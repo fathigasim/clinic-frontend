@@ -1,0 +1,75 @@
+import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
+import { paymentApi } from "./PaymentApi";
+const initialState={
+    message:null,
+    error:null,
+    loading:false
+}
+
+export const addPayment = createAsyncThunk(
+    'invoice/addInvoice',
+    async (payload, { rejectWithValue }) => {
+        try {
+            const response = await paymentApi.addPaymentApi( payload);
+            return response;
+        } catch (error) {
+           console.error('Error response status:', error.response?.status);
+      if (error.response?.status === 409) {
+      return  rejectWithValue({exceptionMessage:'record already exists'});
+      }
+        if (error.response?.status === 404) {
+      return  rejectWithValue({exceptionMessage:'The requested item was not found'});
+      }
+      console.error('Error response data:', error.response?.data);
+      //  Handle array of errors
+      const errors = error?.response?.data;
+  console.log("testing errors before reject with values",errors)
+      if (Array.isArray(errors)) {
+        // If it's an array, join into a string or return as-is
+        return rejectWithValue(errors);
+      }
+
+      // If it's an object with errors property
+      if (errors?.errors) {
+        return rejectWithValue(errors.errors);
+      }
+
+      // If it's an object with message
+      if (errors?.message) {
+        return rejectWithValue(errors.message);
+      }
+
+      return rejectWithValue("Failed to add payment record");
+     
+        }
+    }
+);
+const paymentSlice=createSlice({
+     name: 'payment',
+  initialState,
+ reducers: {
+    clearError: (state) => {
+      state.error = null;
+      
+    },
+   clearMessge:(state)=>{
+    state.message=null;
+   }
+  },
+  extraReducers:(builder)=>{
+    builder.addCase(addPayment.loading,(state)=>{
+        state.loading=true;
+        state.error=null
+    }).addCase(addPayment.fulfilled,(state,action)=>{
+        state.loading=false;
+        state.error=null
+    }).addCase(addPayment.rejected,(state,action)=>{
+        state.loading=false;
+        state.error=action.payload
+    })
+  }
+})
+export const {clearMessge,clearError}=paymentSlice.actions;
+export const selectPaymentLoading = (state) => state.payment.loading;
+export const selectPaymentError = (state) => state.payment.error;
+export default paymentSlice
