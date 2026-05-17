@@ -1,5 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { AppointmentApi } from './AppointmentApi';
+
+
+export const getNotInvoicedAppointments = createAsyncThunk(
+  'appointment/getnotinvoicedappointments',
+  async (_,{rejectWithValue}) => {
+    try {
+      const result = await AppointmentApi.getNotInvoicedAppointmentsApi();
+      console.log('Not invoiced appointments =>:', result);
+      return result.data;
+    } catch (error) {
+      console.error('Error response data:', error.response?.data);
+      return rejectWithValue(error.response?.data || 'Not available.');
+    }
+  }
+);
+
 export const addAppointment = createAsyncThunk(
   'appointment/addAppointment',
   async (payload,{rejectWithValue}) => {
@@ -50,6 +66,7 @@ export const getDoctorShiftToday = createAsyncThunk(
 
 
 const initialState = {
+  notInvoicedAppointments:[],
   doctorsavailable:[],
   appointments: [],
   data: null,
@@ -71,7 +88,18 @@ const appointmentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-   
+        .addCase(getNotInvoicedAppointments.pending, (state) => {
+        
+        state.loading = true;
+        state.error = null;
+      }).addCase(getNotInvoicedAppointments.fulfilled, (state,action) => {
+        state.notInvoicedAppointments=action.payload;
+        state.loading = false;
+        state.error = null;
+      }).addCase(getNotInvoicedAppointments.rejected, (state) => {
+        state.loading = false;
+        state.error = null;
+      }) 
       .addCase(addAppointment.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -105,6 +133,7 @@ export const {
 } = appointmentSlice.actions;
 
 //  Selectors
+export const selectNotInvoicedAppointments = (state) => state.appointment.notInvoicedAppointments;
 export const selectTodaysAvailableDoctors = (state) => state.appointment.doctorsavailable;
 export const selectAllAppointments = (state) => state.appointment.appointments;
 export const selectAppointmentLoading = (state) => state.appointment.loading;

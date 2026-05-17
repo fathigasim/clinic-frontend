@@ -118,31 +118,9 @@ const [formErrors, setFormErrors] = useState({
   return (
     <>
     {console.log("available slots in component =>", doctorSlots)}
-        <Container className='mt-3 justify-content-center'>
+        <Container className='mt-3 mb-3 justify-content-center'>
         
-             <Row>
-              <Col md={8}>
-        <Alert variant='info'>
-          {doctorSlots.length > 0 ? (
-            <>
-              <p className="text-center" style={{fontSize:"20px"}}><i>Doctor Available Slots</i></p>
-              {dOfW !== "" && (
-                <div className="d-flex flex-wrap gap-2">
-                  {doctorSlots.map((slot, index) => (
-                    <div key={index} className="border rounded p-2">
-                      {slot.availableSlot}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="text-center" style={{fontSize:"20px"}}><i>No available slots for the selected doctor and day.</i></p>
-          )}
-        </Alert>
-          </Col>
-        </Row>
-        
+            
     
     <Row>
       <Col md={8}>
@@ -202,6 +180,31 @@ const [formErrors, setFormErrors] = useState({
             </Form >
             </Col>
             </Row>
+             <Row>
+           <Col md={8}>
+          {doctorSlots.length>0 ?
+         (
+        <Alert variant='info'>
+        
+              <p className="text-center" style={{fontSize:"20px"}}><i>Doctor Available Slots</i></p>
+              {dOfW !== "" && (
+                <div className="d-flex flex-wrap gap-2">
+                  {doctorSlots.map((slot, index) => (
+                    <div key={index} className="border rounded p-2">
+                      {slot.availableSlot}
+                    </div>
+                  ))}
+                </div>
+              )}
+          
+                </Alert>
+  ):(
+     <Alert variant='danger'><p>No slots available for this doctor</p></Alert>
+  )
+           }
+    </Col>
+        </Row>
+        
             <h3>Book Appointment </h3>
             <Row>
                 <Col md={8}>

@@ -15,10 +15,10 @@ export const addInvoice = createAsyncThunk(
         } catch (error) {
            console.error('Error response status:', error.response?.status);
       if (error.response?.status === 409) {
-      return  rejectWithValue({exceptionMessage:'record already exists'});
+      return  rejectWithValue('record already exists');
       }
         if (error.response?.status === 404) {
-      return  rejectWithValue({exceptionMessage:'The requested item was not found'});
+      return  rejectWithValue('The requested item was not found');
       }
       console.error('Error response data:', error.response?.data);
       //  Handle array of errors
