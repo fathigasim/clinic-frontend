@@ -13,6 +13,8 @@ import AppointmentForm from './features/appointment/components/AppointmentForm'
 import MedicalRecordForm from './features/medicalrecord/components/MedicalRecordForm'
 import InvoiceForm from './features/invoice/components/InvoiceForm'
 import PaymentForm from './features/payment/components/PaymentForm'
+import TodayAppointments from './features/appointment/components/TodayAppointments'
+import VisualCharts from './features/charts/VisualCharts'
 function App() {
   
   return (
@@ -28,9 +30,11 @@ function App() {
        <Route path='/forbidden' element={<Forbidden/>}></Route>
        <Route path='/schedule' element={<DoctorSchedule/>}></Route>
        <Route path='/appointmentform' element={<AppointmentForm/>}></Route>
+         <Route path='/appointments' element={<TodayAppointments/>}></Route>
        <Route path='/medicalrecord' element={<MedicalRecordForm/>}></Route>
        <Route path='/invoice' element={<InvoiceForm/>}></Route>
        <Route path='/payment' element={<PaymentForm/>}></Route>
+      <Route path='/visualcharts' element={<VisualCharts/>}></Route>
 
        --private routes --
        <Route path="/patientform" element={

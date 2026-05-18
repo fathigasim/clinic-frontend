@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Container, Form, Button, Col, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { addmedical } from '../medicalrecordSlice';
+import TodayAppointments from '../../appointment/components/TodayAppointments';
 
 const initialState = {
   appointmentNumber: '',
@@ -81,9 +82,9 @@ const MedicalRecordForm = () => {
   };
 
   return (
-    <Container className='mt-3 justify-content-center'>
+    <Container className='mt-3 mb-5'>
       <Row>
-        <Col md={8}>
+        <Col md={6}>
           <h3><i>Medical Record  </i></h3>
           <Form onSubmit={handleSubmit} className='d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3'>
 
@@ -181,6 +182,12 @@ const MedicalRecordForm = () => {
 
             <Button className='mt-3' type="submit">Add Medical Record</Button>
           </Form>
+        </Col>
+        <Col md={6}>
+            <div  className='d-flex gap-2 flex-wrap align-items-end mb-4 shadow-sm'>
+                   <h4 className='text-center'><i>Appointment Schedule   </i></h4>
+           <TodayAppointments/>
+           </div>
         </Col>
       </Row>
     </Container>

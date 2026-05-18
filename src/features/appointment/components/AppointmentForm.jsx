@@ -6,15 +6,22 @@ import {getTodaysPatients,selectTodaysPatients,selectPatientMessage} from '../..
 import { selectDoctorLoading,getDoctorsAvailableSlots,selectAvailableSlots } from '../../doctor/doctorSlice';
 import { toast } from 'react-toastify'; 
 
+    const initialState = {
+        patientId: '',
+        doctorId: '',
+        dayOfWeek: '',
+        startTime:'',
+        notes:'',
+        docId:'',
+        dOfW:''
+    };
 const AppointmentForm = () => {
-const [patientId, setPatientId] = useState("");
-const [doctorId, setDoctorId] = useState("");
-const [dayOfWeek, setDayOfWeek] = useState("");
-const [startTime, setStartTime] = useState("");
-const [notes, setNotes] = useState("");
+
 //
-const [docId, setDocId] = useState("");
-const [dOfW, setDOfW] = useState("");
+
+
+
+    const [appointment, setAppointment] = useState(initialState);
 const [formErrors, setFormErrors] = useState({
   patientId: "",
   doctorId: "",
@@ -36,16 +43,16 @@ const [formErrors, setFormErrors] = useState({
 
   const errors = {};
 
-  if (!docId) errors.docId = "Please select a doctor.";
-  if (dOfW === "" || isNaN(dOfW)) errors.dOfW = "Please select a day.";
+  if (!appointment.docId) errors.docId = "Please select a doctor.";
+  if (appointment.dOfW === "" || isNaN(appointment.dOfW)) errors.dOfW = "Please select a day.";
   if (Object.keys(errors).length > 0) {
     setFormErrors(prev => ({ ...prev, ...errors }));
     return;
   }
 
   // safe to dispatch here
-  console.log("Dispatching getDoctorsAvailableSlots with doctorId:", docId, "and dayOfWeek:", dOfW);
-  await dispatch(getDoctorsAvailableSlots({ doctorId: docId, dayOfWeek: dOfW })).unwrap()};
+  console.log("Dispatching getDoctorsAvailableSlots with doctorId:", appointment.docId, "and dayOfWeek:", appointment.dOfW);
+  await dispatch(getDoctorsAvailableSlots({ doctorId: appointment.docId, dayOfWeek: appointment.dOfW })).unwrap()};
 
 
     useEffect ( ()=>{ 
@@ -68,35 +75,44 @@ const [formErrors, setFormErrors] = useState({
       console.log("fetch todays doctors",err)
     }
    },[dispatch])
-  
+ const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'amount') return;
+
+    setAppointment((prev) => ({
+        ...prev,
+        [name]: (() => {
+            if (name === "dayOfWeek" || name === "dOfW") {
+                return value === '' ? '' : parseInt(value, 10); //  keep '' don't convert to null
+            }
+            return value;
+        })(),
+    }));
+};
    const handleSubmit = async (e) => {
         e.preventDefault();
        // Validate all required fields before dispatching
   const errors = {};
-  if (!patientId) errors.patientId = "Please select a patient.";
-  if (!doctorId) errors.doctorId = "Please select a doctor.";
-  if (dayOfWeek === "" || dayOfWeek === null || dayOfWeek === undefined) {
+  if (!appointment.patientId) errors.patientId = "Please select a patient.";
+  if (!appointment.doctorId) errors.doctorId = "Please select a doctor.";
+  if (appointment.dayOfWeek === "" || appointment.dayOfWeek === null || appointment.dayOfWeek === undefined) {
     errors.dayOfWeek = "Please select a day.";
   }
-  if (!startTime) errors.startTime = "Please enter a start time.";
-  if (!notes) errors.notes = "Please enter notes.";
+  if (!appointment.startTime) errors.startTime = "Please enter a start time.";
+  if (!appointment.notes) errors.notes = "Please enter notes.";
   if (Object.keys(errors).length > 0) {
     setFormErrors(prev => ({ ...prev, ...errors }));
     return;
   }
         setFormErrors({ patientId: "", doctorId: "", dayOfWeek: "", startTime: "", notes: "" });
         try {
-            const result = await dispatch(addAppointment({ patientId, doctorId, dayOfWeek, startTime: startTime.length === 5 ? `${startTime}:00` : startTime, notes })).unwrap();
+            const result = await dispatch(addAppointment({patientId:appointment.patientId,doctorId: appointment.doctorId,dayOfWeek: appointment.dayOfWeek, startTime: appointment.startTime.length === 5 ? `${appointment.startTime}:00` : appointment.startTime,notes: appointment.notes })).unwrap();
      
             if (!result.isSuccess) {
                 toast.error(result.errorMessage || 'Failed to add appointment.');
                 return;
             }
-             setPatientId("");
-            setDoctorId("");
-            setDayOfWeek("");
-            setStartTime("");
-            setNotes("");
+           setAppointment(initialState);
             toast.success(result.data || 'Appointment added successfully.');
         } catch (err) {
        
@@ -128,14 +144,9 @@ const [formErrors, setFormErrors] = useState({
             <Form onSubmit={availableSlots} className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
                     <Form.Group controlId="docId" className='mb-3'>
                         <Form.Label>Doctor </Form.Label>
-                        <Form.Select type="text" value={docId} onChange={(e) =>{ setDocId(e.target.value)
+                        <Form.Select name='docId' type="text" value={appointment.docId ??''} onChange={ handleInputChange}
 
-                            if (formErrors.docId) {
-      setFormErrors(prev => ({
-        ...prev,
-        docId: undefined
-      }))}
-                        }} isInvalid={!!formErrors.docId} placeholder="Enter doctor" >
+                     isInvalid={!!formErrors.docId} placeholder="Enter doctor" >
                             <option value="">---Select Doctor---</option>
                             {doctorsShift&&doctorsShift.map((doctor)=>(
                             <option key={doctor.doctorId} value={doctor.doctorId}>{doctor.firstName}{doctor.lastName}{doctor.specialization}</option>
@@ -143,21 +154,14 @@ const [formErrors, setFormErrors] = useState({
                             ))}
                             </Form.Select>
                                     <Form.Control.Feedback type="invalid">
-          {formErrors.docId}
+          {formErrors.docId}    
            </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group controlId="dayOfWId" className='mb-3'>
                         <Form.Label>Day of Week</Form.Label>
-                        <Form.Select type="text" value={dOfW}
-                         onChange={(e) =>{setDOfW(parseInt((e.target.value)))
-                         
-
-                            if (formErrors.dOfW) {
-      setFormErrors(prev => ({
-        ...prev,
-        dOfW: undefined
-      }))}
-                        }}  isInvalid={!!formErrors.dOfW} placeholder="Enter day of week" >
+                        <Form.Select name='dOfW' type="text" value={appointment.dOfW ??''}
+                         onChange={handleInputChange} 
+                         isInvalid={!!formErrors.dOfW} placeholder="Enter day of week" >
                              <option value="">---Select a day---</option>
                             <option value={0}>Sunday</option>
                             <option value={1}>Monday</option>
@@ -187,7 +191,7 @@ const [formErrors, setFormErrors] = useState({
         <Alert variant='info'>
         
               <p className="text-center" style={{fontSize:"20px"}}><i>Doctor Available Slots</i></p>
-              {dOfW !== "" && (
+              {appointment.dOfW !== "" && (
                 <div className="d-flex flex-wrap gap-2">
                   {doctorSlots.map((slot, index) => (
                     <div key={index} className="border rounded p-2">
@@ -214,14 +218,9 @@ const [formErrors, setFormErrors] = useState({
                 <Form onSubmit={handleSubmit} className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
                     <Form.Group controlId="doctorId">
                         <Form.Label>Doctor </Form.Label>
-                        <Form.Select type="text" value={doctorId} onChange={(e) =>{ setDoctorId(e.target.value)
+                        <Form.Select name='doctorId' type="text" value={appointment.doctorId} onChange={handleInputChange}
 
-                            if (formErrors.doctorId) {
-      setFormErrors(prev => ({
-        ...prev,
-        doctorId: undefined
-      }))}
-                        }} isInvalid={!!formErrors.doctorId} placeholder="Enter doctor" >
+                         isInvalid={!!formErrors.doctorId} placeholder="Enter doctor" > 
                             <option value="">---Select Doctor---</option>
                             {doctorsShift&&doctorsShift.map((doctor)=>(
                             <option key={doctor.doctorId} value={doctor.doctorId}>{doctor.firstName}{doctor.lastName}{doctor.specialization}</option>
@@ -235,14 +234,9 @@ const [formErrors, setFormErrors] = useState({
 
                     <Form.Group controlId="patientId">
                         <Form.Label>Patient </Form.Label>
-                        <Form.Select type="text" value={patientId} onChange={(e) =>{ setPatientId(e.target.value)
+                        <Form.Select name='patientId' type="text" value={appointment.patientId} onChange={ handleInputChange}
 
-                                            if (formErrors.patientId) {
-      setFormErrors(prev => ({
-        ...prev,
-        patientId: undefined
-      }))}
-                        }} isInvalid={!!formErrors.patientId} placeholder="Patient" >
+                     isInvalid={!!formErrors.patientId} placeholder="Patient" >
                             <option>---Select Patient---</option>
                             {todaypatients&&
                                 todaypatients.map((patient)=>(
@@ -258,16 +252,12 @@ const [formErrors, setFormErrors] = useState({
                     </Form.Group>
                       <Form.Group controlId="dayOfWeekId">
                         <Form.Label>Day of Week</Form.Label>
-                        <Form.Select type="text" value={dayOfWeek}
-                         onChange={(e) =>{setDayOfWeek(parseInt((e.target.value)))
+                        <Form.Select name='dayOfWeek' type="text" value={appointment.dayOfWeek ??''}
+                         onChange={handleInputChange}
                          
 
-                            if (formErrors.dayOfWeek) {
-      setFormErrors(prev => ({
-        ...prev,
-        dayOfWeek: undefined
-      }))}
-                        }}  isInvalid={!!formErrors.dayOfWeek} placeholder="Enter day of week" >
+   
+                      isInvalid={!!formErrors.dayOfWeek} placeholder="Enter day of week" >
                              <option value="">---Select a day---</option>
                             <option value={0}>Sunday</option>
                             <option value={1}>Monday</option>
@@ -281,31 +271,20 @@ const [formErrors, setFormErrors] = useState({
           {formErrors.dayOfWeek}
            </Form.Control.Feedback>
                     </Form.Group>
-                       <Form.Group value={startTime} controlId="formBasicNotes">
+                       <Form.Group name='startTime' value={appointment.startTime} controlId="formBasicNotes">
                         <Form.Label>Start Time</Form.Label>
-                        <Form.Control type="time" value={startTime} onChange={(e) =>{ setStartTime(e.target.value)
+                        <Form.Control name='startTime' type="time" value={appointment.startTime} onChange={ handleInputChange}
 
-                             if (formErrors.startTime) {
-      setFormErrors(prev => ({
-        ...prev,
-        startTime: undefined
-      }))}
-                        }} isInvalid={!!formErrors.startTime} placeholder="Enter start time" />
+              
+                   isInvalid={!!formErrors.startTime} placeholder="Enter start time" />
                            <Form.Control.Feedback type="invalid">
           {formErrors.startTime}
            </Form.Control.Feedback>
                     </Form.Group>
-                    <Form.Group value={notes} controlId="formBasicNotes">
+                    <Form.Group name='notes' value={appointment.notes} controlId="formBasicNotes">
                         <Form.Label>Notes</Form.Label>
-                        <Form.Control type="text" value={notes} onChange={(e) =>{ setNotes(e.target.value)
- if (formErrors.notes) {
-      setFormErrors(prev => ({
-        ...prev,
-        notes: undefined
-      }))}
-
-
-                        }}   isInvalid={!!formErrors.notes} placeholder="Enter notes" />
+                        <Form.Control name='notes' type="text" value={appointment.notes} onChange={ handleInputChange}
+                        isInvalid={!!formErrors.notes} placeholder="Enter notes" />
     <Form.Control.Feedback type="invalid">
           {formErrors.notes}
            </Form.Control.Feedback>

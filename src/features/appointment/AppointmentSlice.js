@@ -1,6 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { AppointmentApi } from './AppointmentApi';
 
+export const getTodaysAppointments = createAsyncThunk(
+  'appointment/getTodaysappointments',
+  async (payload,{rejectWithValue}) => {
+    try {
+      const result = await AppointmentApi.getTodaysAppointmentsApi({page:payload.page,pageSize:payload.pageSize});
+      console.log('Todays appointments thunk result =>:', result);
+      return result.data;
+    } catch (error) {
+      console.error('Error response data:', error.response?.data);
+      return rejectWithValue(error.response?.data || 'Not available.');
+    }
+  }
+);
 
 export const getNotInvoicedAppointments = createAsyncThunk(
   'appointment/getnotinvoicedappointments',
@@ -67,6 +80,8 @@ export const getDoctorShiftToday = createAsyncThunk(
 
 const initialState = {
   notInvoicedAppointments:[],
+  todaysAppointments:[],
+  totalPages:0,
   doctorsavailable:[],
   appointments: [],
   data: null,
@@ -88,8 +103,20 @@ const appointmentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-        .addCase(getNotInvoicedAppointments.pending, (state) => {
+    .addCase(getTodaysAppointments.pending, (state) => {
         
+        state.loading = true;
+        state.error = null;
+      }).addCase(getTodaysAppointments.fulfilled, (state,action) => {
+        state.todaysAppointments=action.payload.items;
+        state.totalPages=action.payload.totalPages;
+        state.loading = false;
+        state.error = null;
+      }).addCase(getTodaysAppointments.rejected, (state) => {
+        state.loading = false;
+        state.error = null;
+      }) 
+        .addCase(getNotInvoicedAppointments.pending, (state) => {
         state.loading = true;
         state.error = null;
       }).addCase(getNotInvoicedAppointments.fulfilled, (state,action) => {
@@ -133,6 +160,8 @@ export const {
 } = appointmentSlice.actions;
 
 //  Selectors
+export const selectTodaysAppointments = (state) => state.appointment.todaysAppointments;
+export const selectTotalpages = (state) => state.appointment.totalPages;
 export const selectNotInvoicedAppointments = (state) => state.appointment.notInvoicedAppointments;
 export const selectTodaysAvailableDoctors = (state) => state.appointment.doctorsavailable;
 export const selectAllAppointments = (state) => state.appointment.appointments;

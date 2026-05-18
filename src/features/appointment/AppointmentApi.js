@@ -1,7 +1,11 @@
  import api from '../../services/api';
  
  export const AppointmentApi = {
-
+  getTodaysAppointmentsApi: async ({page,pageSize}) => {
+    const response = await api.get('/Appointment/TodaysAppointments',{params:{page,pageSize}});
+    console.log(`api todays  appointments list : ${response.data}`)
+    return response.data;
+  },
   getNotInvoicedAppointmentsApi: async () => {
     const response = await api.get('/Appointment/NotInvoicedAppointments');
     console.log(`api not invoiced appointments list : ${response.data}`)
