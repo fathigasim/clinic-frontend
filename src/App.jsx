@@ -15,6 +15,7 @@ import InvoiceForm from './features/invoice/components/InvoiceForm'
 import PaymentForm from './features/payment/components/PaymentForm'
 import TodayAppointments from './features/appointment/components/TodayAppointments'
 import VisualCharts from './features/charts/VisualCharts'
+import RegisterForm from './features/auth/components/RegisterForm'
 function App() {
   
   return (
@@ -26,6 +27,7 @@ function App() {
      <Route path="/" element={<HomePage/>} />
     
        <Route path="/doctorform" element={<DoctorForm/>} />
+       <Route path="/register" element={<RegisterForm/>} />
        <Route path="/login" element={<LoginForm/>} />
        <Route path='/forbidden' element={<Forbidden/>}></Route>
        <Route path='/schedule' element={<DoctorSchedule/>}></Route>

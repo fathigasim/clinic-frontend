@@ -9,6 +9,7 @@
   registerApi:async (payload)=>{
         const response = await api.post('/auth/register', payload);
     console.log(`api product data : ${response.data}`)
+      return response.data;
   },
    refreshToken: async () => {
     const response = await api.post('/auth/refresh');
