@@ -1,13 +1,14 @@
 import { Button, Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
-import { logout } from '../auth/authSlice';
-import { useDispatch } from 'react-redux';
+import { logout ,selectIsAuthenticated} from '../auth/authSlice';
+import { useDispatch,useSelector } from 'react-redux';
 import { tokenService } from '../../services/tokenService';
 import { Link, useNavigate } from 'react-router-dom';
 
 const NavBar = () => {
   const token = tokenService.getAccessToken();
-  const isAuthenticated = !!token && !tokenService.isTokenExpired(token);
-
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  
+  const user=tokenService.getEmailFromToken(token);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -45,6 +46,8 @@ const NavBar = () => {
               </div>
 
               {isAuthenticated && (
+                <>
+                  <span className="text-light">Welcome, {user || 'User'}!</span>
                 <Button
                   variant="outline-light"
                   size="sm"
@@ -53,6 +56,7 @@ const NavBar = () => {
                 >
                   Logout
                 </Button>
+                </>
               )}
             </div>
 

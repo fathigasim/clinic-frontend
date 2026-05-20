@@ -1,109 +1,112 @@
 import { jwtDecode } from 'jwt-decode';
 
 const TOKEN_KEY = 'authToken';
-//const REFRESH_TOKEN_KEY = 'refreshToken';
-const USER_KEY = 'user';
 
 export const tokenService = {
-  // Get tokens
+  // Get token
   getAccessToken: () => localStorage.getItem(TOKEN_KEY),
-  //getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY),
-  
-  // Set tokens
-  setTokens: (accessToken
-   // , refreshToken
-) => {
+
+  // Set token
+  setTokens: (accessToken) => {
     if (accessToken) localStorage.setItem(TOKEN_KEY, accessToken);
-  //  if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   },
-  
-  // Clear tokens
+
+  // Clear token
   clearTokens: () => {
     localStorage.removeItem(TOKEN_KEY);
-   // localStorage.removeItem(REFRESH_TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
   },
-  
-  // Get user data
-  getUser: () => {
-    const userStr = localStorage.getItem(USER_KEY);
-    return userStr ? JSON.parse(userStr) : null;
+
+  // Check if token is valid
+  isTokenValid: (token) => {
+    if (!token) return false;
+    return !tokenService.isTokenExpired(token);
   },
-  
-  // Set user data
-  setUser: (user) => {
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+
+  // Get valid token or null if expired
+  getValidAccessToken: () => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token || tokenService.isTokenExpired(token)) {
+      tokenService.clearTokens();
+      return null;
+    }
+    return token;
   },
-  
+
   // Check if token is expired
   isTokenExpired: (token) => {
     if (!token) return true;
-    
     try {
       const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      return decoded.exp < currentTime;
-    } catch (error) {
+      return decoded.exp < Date.now() / 1000;
+    } catch {
       return true;
     }
   },
-  
+
   // Get token expiration time
   getTokenExpiration: (token) => {
     if (!token) return null;
-    
     try {
       const decoded = jwtDecode(token);
-      return decoded.exp * 1000; // Convert to milliseconds
-    } catch (error) {
+      return decoded.exp * 1000;
+    } catch {
       return null;
     }
   },
-  
-  // ✅ FIXED: Get user ID from token (handles .NET ClaimTypes)
+
   getUserIdFromToken: (token) => {
-    if (!token) return null;
-    
-    try {
-      const decoded = jwtDecode(token);
-      
-      console.log('🔍 Decoded token:', decoded); // Debug
-      
-      //  Try different claim names (.NET uses long URL format)
-      return (
-        decoded.sub || 
-        decoded.nameid || 
-        decoded.userId ||
-        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || //  .NET NameIdentifier
-        decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/userdata'] ||
-        null
-      );
-    } catch (error) {
-      console.error('Failed to decode token:', error);
-      return null;
-    }
-  },
-  
-  // ✅ BONUS: Get email from token
-  getEmailFromToken: (token) => {
-    if (!token) return null;
-    
-    try {
-      const decoded = jwtDecode(token);
-      return (
-        decoded.email ||
-        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ||
-        null
-      );
-    } catch (error) {
-      return null;
-    }
-  },
-  
-  // ✅ BONUS: Get username from token
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.sub || null; // ✅ backend uses JwtRegisteredClaimNames.Sub
+  } catch {
+    return null;
+  }
+},
+
+getEmailFromToken: (token) => {
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.email || null; // ✅ backend uses JwtRegisteredClaimNames.Email
+  } catch {
+    return null;
+  }
+},
+  // // Get user ID from token
+  // getUserIdFromToken: (token) => {
+  //   if (!token) return null;
+  //   try {
+  //     const decoded = jwtDecode(token);
+  //     return (
+  //       decoded.sub ||
+  //       decoded.nameid ||
+  //       decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
+  //       null
+  //     );
+  //   } catch {
+  //     return null;
+  //   }
+  // },
+
+  // // Get email from token
+  // getEmailFromToken: (token) => {
+  //   if (!token) return null;
+  //   try {
+  //     const decoded = jwtDecode(token);
+  //     return (
+  //       decoded.email ||
+  //       decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ||
+  //       null
+  //     );
+  //   } catch {
+  //     return null;
+  //   }
+  // },
+
+  // Get username from token
   getUserNameFromToken: (token) => {
     if (!token) return null;
-    
     try {
       const decoded = jwtDecode(token);
       return (
@@ -111,33 +114,23 @@ export const tokenService = {
         decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
         null
       );
-    } catch (error) {
+    } catch {
       return null;
     }
   },
 
-  getUserRoles(token) {
-  try {
-    const decoded = jwtDecode(token);
-    
-    // Check for ASP.NET Core Identity role claim format
-    const aspNetRoles = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-    
-    if (aspNetRoles) {
-      // Role claim can be a string or array
-      return Array.isArray(aspNetRoles) ? aspNetRoles : [aspNetRoles];
+  // Get roles from token
+  getUserRoles: (token) => {
+    if (!token) return [];
+    try {
+      const decoded = jwtDecode(token);
+      const aspNetRoles = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      if (aspNetRoles) return Array.isArray(aspNetRoles) ? aspNetRoles : [aspNetRoles];
+      const simpleRoles = decoded.role;
+      if (simpleRoles) return Array.isArray(simpleRoles) ? simpleRoles : [simpleRoles];
+      return [];
+    } catch {
+      return [];
     }
-    
-    // Fallback to simple 'role' claim
-    const simpleRoles = decoded.role;
-    if (simpleRoles) {
-      return Array.isArray(simpleRoles) ? simpleRoles : [simpleRoles];
-    }
-    
-    return [];
-  } catch (error) {
-    console.error('Error extracting roles from token:', error);
-    return [];
-  }
-}
+  },
 };

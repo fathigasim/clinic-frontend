@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authApi } from './AuthApi';
 import { tokenService } from '../../services/tokenService';
+
 const extractError = (error) => {
   const data = error.response?.data;
   if (!data) return error.message ?? 'Something went wrong';
@@ -28,12 +29,33 @@ export const register = createAsyncThunk(
   async (registerData, { rejectWithValue }) => {
     try {
       const result = await authApi.registerApi(registerData);
-      console.log('Register Data:', result);
+      // tokenService.setTokens(result.accessToken);
       return result;
     } catch (error) {
      return rejectWithValue(extractError(error));}}
 );
 
+export const confirmEmail = createAsyncThunk(
+  'auth/confirm-email',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const result = await authApi.confirmEmailApi(payload);
+        console.log('confirm email Data:', result);
+      return result;
+    } catch (error) {
+     return rejectWithValue(extractError(error));}}
+);
+
+export const resetPassword = createAsyncThunk(
+  'auth/reset-password',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const result = await authApi.resetPasswordApi(payload);
+        console.log('reset password Data:', result);
+      return result;
+    } catch (error) {
+     return rejectWithValue(extractError(error));}}
+);
 export const refresh = createAsyncThunk(
   'auth/refresh',
   async (_, { rejectWithValue }) => {
@@ -48,44 +70,36 @@ export const refresh = createAsyncThunk(
   }
 );
 
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const result = await authApi.forgotPasswordApi(payload);
+     
+      console.log('forgot password data:', result.data);
+      return result.data;
+    } catch (error) {
+      console.error('Error in forgot password:', error);
+      return rejectWithValue(extractError(error));
+    }
+  }
+);
 export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      await authApi.logoutApi(); // call FIRST while token still exists
+      await authApi.logoutApi();
+      tokenService.clearTokens(); //  move here
     } catch (error) {
-       tokenService.clearTokens();
-   return rejectWithValue(extractError(error));
-      // clear AFTER, always
-    
-
-  //  return null;
-  }}
+      tokenService.clearTokens(); // clear even on error
+      return rejectWithValue(extractError(error));
+    }
+  }
 );
-  
-// export const logout = createAsyncThunk(
-//   'auth/logout',
-//   async (_, { rejectWithValue }) => {
-//     try {
-//       await authApi.logoutApi(); // call FIRST while token still exists
-//     } catch (error) {
-//       if (!error.response) {
-//         console.error('Network error during logout:', error.message);
-//       } else if (error.response.status === 401) {
-//         console.warn('Token already invalid, proceeding with local logout');
-//       } else {
-//         console.log('Logout API call failed (ignored):', error.message);
-//       }
-//     } finally {
-//       tokenService.clearTokens(); // clear AFTER, always
-//     }
-
-//     return null;
-//   }
-// );
+const token = tokenService.getValidAccessToken();
 // Initial state
 const initialState = {
-
+    isAuthenticated: !!token,
   token:null,
   loading: false,
   error: null,
@@ -106,25 +120,58 @@ const authSlice = createSlice({
       .addCase(register.pending, (state) => {
         state.loading = true;
         state.error = null;
-      }).addCase(register.fulfilled, (state,action) => {
-       state.token=action.payload.accessToken
-       
-
-    
+      }).addCase(register.fulfilled, (state) => {
+      //  state.token=action.payload.accessToken
         state.loading = false;
         state.error = null;
       }).addCase(register.rejected, (state,action) => {
         state.loading = false;
         state.error = action.payload;
       }) 
+      //confirm email
+        .addCase(confirmEmail.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(confirmEmail.fulfilled, (state) => {
+      //  state.token=action.payload.accessToken
+        state.loading = false;
+        state.error = null;
+      }).addCase(confirmEmail.rejected, (state,action) => {
+        state.loading = false;
+        state.error = action.payload;
+      }) 
+      //forgot password
+       .addCase(forgotPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(forgotPassword.fulfilled, (state) => {
+      
+        state.loading = false;
+        state.error = null;
+      }).addCase(forgotPassword.rejected, (state,action) => {
+        state.loading = false;
+        state.error = action.payload;
+      }) 
+      //reset password
+       .addCase(resetPassword.pending, (state) => {
+        state.loading = true;})
+        .addCase(resetPassword.fulfilled, (state) => {
+      //  state.token=action.payload.accessToken
+        state.loading = false;
+        state.error = null;
+      }).addCase(resetPassword.rejected, (state,action) => {
+        state.loading = false;
+        state.error = action.payload;
+      }) 
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
-      }).addCase(login.fulfilled, (state,action) => {
-       state.token= action.payload.accessToken;
-        state.loading = false;
-        state.error = null;
-      }).addCase(login.rejected, (state,action) => {
+      }).addCase(login.fulfilled, (state, action) => {
+  state.token = action.payload.accessToken;
+  state.isAuthenticated = true; //  add this
+  state.loading = false;
+  state.error = null;
+}).addCase(login.rejected, (state,action) => {
         state.loading = false;
         state.error = action.payload;
       }) 
@@ -132,15 +179,15 @@ const authSlice = createSlice({
        .addCase(refresh.pending, (state) => {
         state.loading = true;
         state.error = null;
-      }).addCase(refresh.fulfilled, (state,action) => {
-       state.token= action.payload
-         tokenService.setTokens(
-          action.payload.accessToken
-          
-        );
-        state.loading = false;
-        state.error = null;
-      }).addCase(refresh.rejected, (state,action) => {
+      }).addCase(refresh.fulfilled, (state, action) => {
+  state.token = action.payload.accessToken; // not the whole payload
+  state.isAuthenticated = true; // add this
+  state.loading = false;
+  state.error = null;
+  // remove duplicate tokenService.setTokens call, already done in the thunk
+})
+  
+     .addCase(refresh.rejected, (state,action) => {
         state.loading = false;
         state.error = action.payload;
       }) 
@@ -151,16 +198,16 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       }).addCase(logout.fulfilled, (state) => {
-       
-        state.loading = false;
+        state.isAuthenticated = false;
+        state.token = null; // ✅ add this
+         state.loading = false;
         state.error = null;
-      }).addCase(logout.rejected, (state) => {
+        }).addCase(logout.rejected, (state) => {
         state.loading = false;
         state.error = null;
       }) 
   },
 });
-
 export const { 
   clearError,
 } = authSlice.actions;

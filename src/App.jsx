@@ -16,6 +16,9 @@ import PaymentForm from './features/payment/components/PaymentForm'
 import TodayAppointments from './features/appointment/components/TodayAppointments'
 import VisualCharts from './features/charts/VisualCharts'
 import RegisterForm from './features/auth/components/RegisterForm'
+import ConfirmEmail from './features/auth/components/ConfirmEmail'
+import ResetPassword from './features/auth/components/ResetPassword'
+import ForegotPassword from './features/auth/components/ForegotPassword'
 function App() {
   
   return (
@@ -29,10 +32,13 @@ function App() {
        <Route path="/doctorform" element={<DoctorForm/>} />
        <Route path="/register" element={<RegisterForm/>} />
        <Route path="/login" element={<LoginForm/>} />
+       <Route path="/auth/confirm-email" element={<ConfirmEmail/>} />
+       <Route path="/auth/forgot-password" element={<ForegotPassword/>} />
+       <Route path="/auth/reset-password" element={<ResetPassword/>} />
        <Route path='/forbidden' element={<Forbidden/>}></Route>
        <Route path='/schedule' element={<DoctorSchedule/>}></Route>
        <Route path='/appointmentform' element={<AppointmentForm/>}></Route>
-         <Route path='/appointments' element={<TodayAppointments/>}></Route>
+       <Route path='/appointments' element={<TodayAppointments/>}></Route>
        <Route path='/medicalrecord' element={<MedicalRecordForm/>}></Route>
        <Route path='/invoice' element={<InvoiceForm/>}></Route>
        <Route path='/payment' element={<PaymentForm/>}></Route>
