@@ -2,13 +2,13 @@
  
  export const doctorApi = {
  getAllDoctorsApi: async () => {
-    const response = await api.get('/doctors/doctors-list');
+    const response = await api.get('/doctors/doctors-list',{params:{page:1,pageSize:5}});
     console.log(`api product data : ${response.data}`)
     return response.data;
   },
-  getDoctorsAvailableSlotsApi: async ({doctorId, dayOfWeek}) => {
+  getDoctorsAvailableSlotsApi: async (doctorId, dayOfWeek) => {
     console.log(`Fetching available slots for doctorId: ${doctorId}, dayOfWeek: ${dayOfWeek}`);
-    const response = await api.get('/doctors/available-slots',{params: { doctorId, dayOfWeek  }});
+    const response = await api.get('/doctors/available-slots',{params: { doctorId:doctorId, dayOfWeek:dayOfWeek  }});
     console.log(`api product data : ${response.data}`)
     return response.data;
   },

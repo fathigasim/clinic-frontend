@@ -11,7 +11,8 @@ export const addInvoice = createAsyncThunk(
       AppointmentNo: payload.appointmentNumber,  // ← map here
       TotalAmount: payload.totalAmount,
     });
-            return response;
+    console.log(`Add Invoice Thunk API response: ${response.data}`);
+            return response.data;
         } catch (error) {
            console.error('Error response status:', error.response?.status);
       if (error.response?.status === 409) {
@@ -99,6 +100,7 @@ const invoiceSlice = createSlice({
             })
             .addCase(addInvoice.fulfilled, (state, action) => {
                 // Handle successful invoice addition, e.g., update state with new invoice
+                state.message=action.payload;
                   state.loading=false;
                 state.error=null;
             })
@@ -142,6 +144,7 @@ const invoiceSlice = createSlice({
 });
 // export const  { clearError } = invoiceSlice.actions;
 export const { resetInvoice } = invoiceSlice.actions;
+
 export const selectInvoice=(state) => state.invoice.invoice;
 export const selectLatestInvoices=(state) => state.invoice.invoices;
 export const selectLoadingInvoices=(state) => state.invoice.loading;

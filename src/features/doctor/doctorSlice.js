@@ -20,9 +20,9 @@ export const getAllDoctors = createAsyncThunk(
 
 export const getDoctorsAvailableSlots = createAsyncThunk(
   'doctor/getDoctorsAvailableSlots',
-  async ({doctorId, dayOfWeek}) => {
+  async ({doctorId,dayOfWeek}) => {
     try {
-      const result = await doctorApi.getDoctorsAvailableSlotsApi({doctorId, dayOfWeek});
+      const result = await doctorApi.getDoctorsAvailableSlotsApi(doctorId,dayOfWeek);
       console.log('Available Slots Data:', result);
       return result;
     } catch (error) {
@@ -129,7 +129,7 @@ const doctorSlice = createSlice({
         state.error = null;
       }).addCase(getAllDoctors.fulfilled, (state,action) => {
         console.log("getAllDoctors.fulfilled result",action.payload)
-       state.doctors=action.payload
+       state.doctors=action.payload.items
         state.loading = false;
         state.error = null;
       }).addCase(getAllDoctors.rejected, (state) => {

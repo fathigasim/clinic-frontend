@@ -4,10 +4,9 @@ export const invoiceApi = ({
 
      addInvoiceApi:async(payload)=>{
 
-    api.post('/Invoice', payload).then(response => {
+     const response = await api.post('/Invoice', payload);
     console.log(`api invoice data : ${response.data}`)
     return response.data;
-  })
 
     },
 getInvoiceByInvoiceNoApi: async (invoiceNo ) => {

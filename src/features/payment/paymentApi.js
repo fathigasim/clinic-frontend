@@ -4,6 +4,10 @@ export const paymentApi ={
 {
    const response=  await  api.post('/payments',payload);
    return response.data;
+},
+confirmPaymentApi: async(paymentIntentId)=>
+{
+   const response=  await  api.post('/payments/confirm-payment',{paymentIntentId});
+   return response.data;
 }
-
 }

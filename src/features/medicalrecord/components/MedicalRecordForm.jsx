@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Container, Form, Button, Col, Row } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { addmedical } from '../medicalrecordSlice';
+
 import TodayAppointments from '../../appointment/components/TodayAppointments';
 
 const initialState = {

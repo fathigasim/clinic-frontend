@@ -8,12 +8,19 @@ const DoctorSchedule = () => {
    const [dayOfWeek,setDayOfWeek] =useState("");
    const [startTime,setStartTime] =useState("");
    const [endTime,setEndTime] =useState("");
+    const [formErrors, setFormErrors] = useState({});
   const doctors=useSelector(selectAllDoctors);
   const dispatch=useDispatch();
 
   useEffect(()=>{
     dispatch(getAllDoctors())
   },[dispatch])
+
+    const clearFieldError = (field) => {
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
 const DoctorScheduleForm = async()=>{
 try{
   console.log("Checking both start time and end time:", startTime, endTime)
@@ -24,6 +31,10 @@ try{
         toast.error(result.errorMessage || "Failed to add schedule.");
         return;
     }
+     setDayOfWeek("");
+     setDoctorId("");
+     setStartTime("");
+     setEndTime("");
     toast.success(result.data || "Schedule added successfully.");
     }
     catch(err){
@@ -40,16 +51,21 @@ try{
     <Row>
         <Col md={6}>
       <Form noValidate >
-             <FormGroup>
-                <FormSelect  value={doctorId}  onChange={(e)=>setDoctorId(e.target.value)} placeholder='Doctor'>
+             <FormGroup className='mb-3'>
+                <FormSelect  value={doctorId}  onChange={(e)=>{setDoctorId(e.target.value)
+                    clearFieldError("doctorId")
+                }} placeholder='Doctor'>
                     <option value="">---Select Doctor---</option>
                     {doctors.map((doctor)=>(
                         <option key={doctor.doctorId} value={doctor.doctorId}>{doctor.firstName+' '+doctor.lastName+' '+doctor.specialization}</option>
                     ))}
                 </FormSelect>
              </FormGroup>
-            <FormGroup>
-                <FormSelect value={dayOfWeek} onChange={(e)=>setDayOfWeek(parseInt(e.target.value))} placeholder='Day of Week'>
+            <FormGroup className='mb-3'>
+                <FormSelect value={dayOfWeek} onChange={(e)=>{setDayOfWeek(parseInt(e.target.value))
+
+                     clearFieldError("dayOfWeek")
+                }} placeholder='Day of Week'>
                       <option value="">---Select Day---</option>
                       <option value={0}>Sunday</option>
                       <option value={1}>Monday</option>
@@ -60,14 +76,20 @@ try{
                       <option value={6}>Saturday</option>
                 </FormSelect>
             </FormGroup>
-            <FormGroup>
-                <FormControl type='time' value={startTime}  onChange={(e)=>setStartTime(e.target.value)}  >
+            <FormGroup className='mb-3'>
+                <FormControl type='time' value={startTime}  onChange={(e)=>{setStartTime(e.target.value)
+
+                   clearFieldError("startTime") 
+                }}  >
 
                 </FormControl>
             </FormGroup>
 
-             <FormGroup>
-                <FormControl type='time' value={endTime} onChange={(e)=>setEndTime(e.target.value)}  >
+             <FormGroup className='mb-3'>
+                <FormControl type='time' value={endTime} onChange={(e)=>{setEndTime(e.target.value)
+
+                      clearFieldError("endTime") 
+                }}  >
 
                 </FormControl>
             </FormGroup>

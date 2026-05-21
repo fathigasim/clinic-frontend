@@ -1,303 +1,243 @@
-import {useEffect, useState} from 'react'
-import { Container,Row,Col,Form, Button, Alert, ListGroup, ListGroupItem } from 'react-bootstrap'
-import { useDispatch,useSelector } from 'react-redux';
-import { addAppointment,getDoctorShiftToday,selectTodaysAvailableDoctors} from '../appointmentSlice';
-import {getTodaysPatients,selectTodaysPatients,selectPatientMessage} from '../../patient/patientSlice'
-import { selectDoctorLoading,getDoctorsAvailableSlots,selectAvailableSlots } from '../../doctor/doctorSlice';
-import { toast } from 'react-toastify'; 
+import { useEffect,useState } from 'react'
+import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap'
+import { useDispatch, useSelector } from 'react-redux';
+import { useForm } from 'react-hook-form';
+import { addAppointment, getDoctorShiftToday, selectTodaysAvailableDoctors } from '../appointmentSlice';
+import { getTodaysPatients, selectTodaysPatients, selectPatientMessage } from '../../patient/patientSlice'
+import { getDoctorsAvailableSlots, selectAvailableSlots } from '../../doctor/doctorSlice';
+import { toast } from 'react-toastify';
 
-    const initialState = {
-        patientId: '',
-        doctorId: '',
-        dayOfWeek: '',
-        startTime:'',
-        notes:'',
-        docId:'',
-        dOfW:''
-    };
 const AppointmentForm = () => {
+  const doctorsShift = useSelector(selectTodaysAvailableDoctors);
+  const todayPatients = useSelector(selectTodaysPatients);
+  const patientsMessage = useSelector(selectPatientMessage);
+  const doctorSlots = useSelector(selectAvailableSlots);
+  const [slotsChecked, setSlotsChecked] = useState(false);
+  const dispatch = useDispatch();
 
-//
+  // ── Form 1: Check Available Slots ──────────────────────────────
+  const {
+    register: registerSlots,
+    handleSubmit: handleSlotsSubmit,
+    formState: { errors: slotsErrors },
+    watch: watchSlots,
+  } = useForm();
 
+  // ── Form 2: Book Appointment ───────────────────────────────────
+  const {
+    register: registerAppt,
+    handleSubmit: handleApptSubmit,
+    formState: { errors: apptErrors },
+    reset: resetAppt,
+    setError: setApptError,
+  } = useForm();
 
+  useEffect(() => {
+    dispatch(getTodaysPatients());
+    dispatch(getDoctorShiftToday());
+  }, [dispatch]);
 
-    const [appointment, setAppointment] = useState(initialState);
-const [formErrors, setFormErrors] = useState({
-  patientId: "",
-  doctorId: "",
-  dayOfWeek: "",
-  startTime: "",
-  notes: "",
-  docId: "",
-  dOfW: "",
-});
-   const doctorsShift=useSelector(selectTodaysAvailableDoctors)
-   const todaypatients=useSelector(selectTodaysPatients)
-      const patientsMessage=useSelector(selectPatientMessage)
-          const doctorSlots=useSelector(selectAvailableSlots)
-   const dispatch=useDispatch();
+  // Form 1 submit
+  const onCheckSlots = async (data) => {
+    await dispatch(getDoctorsAvailableSlots({
+      doctorId: data.docId,
+      dayOfWeek: Number(data.dOfW),
+    })).unwrap();
+    setSlotsChecked(true);
+  };
 
+  // Form 2 submit
+  const onBookAppointment = async (data) => {
+    try {
+      const result = await dispatch(addAppointment({
+        patientId: data.patientId,
+        doctorId: data.doctorId,
+        dayOfWeek: Number(data.dayOfWeek),
+        startTime: data.startTime.length === 5 ? `${data.startTime}:00` : data.startTime,
+        notes: data.notes,
+      })).unwrap();
 
- const availableSlots = async(e) => {
-  e.preventDefault();
+      if (!result.isSuccess) {
+        toast.error(result.errorMessage || 'Failed to add appointment.');
+        return;
+      }
 
-  const errors = {};
-
-  if (!appointment.docId) errors.docId = "Please select a doctor.";
-  if (appointment.dOfW === "" || isNaN(appointment.dOfW)) errors.dOfW = "Please select a day.";
-  if (Object.keys(errors).length > 0) {
-    setFormErrors(prev => ({ ...prev, ...errors }));
-    return;
-  }
-
-  // safe to dispatch here
-  console.log("Dispatching getDoctorsAvailableSlots with doctorId:", appointment.docId, "and dayOfWeek:", appointment.dOfW);
-  await dispatch(getDoctorsAvailableSlots({ doctorId: appointment.docId, dayOfWeek: appointment.dOfW })).unwrap()};
-
-
-    useEffect ( ()=>{ 
-  
-
-         try{
-    dispatch(getTodaysPatients()).unwrap()
+      resetAppt();
+      toast.success(result.data || 'Appointment added successfully.');
+    } catch (err) {
+      // Map server errors back to fields
+      if (err?.DoctorId)   setApptError('doctorId',  { message: err.DoctorId[0] });
+      if (err?.PatientId)  setApptError('patientId', { message: err.PatientId[0] });
+      if (err?.DayOfWeek)  setApptError('dayOfWeek', { message: err.DayOfWeek[0] });
+      if (err?.StartTime)  setApptError('startTime', { message: err.StartTime[0] });
+      if (err?.Notes)      setApptError('notes',     { message: err.Notes[0] });
     }
-    catch(err){
-        console.log("fetch todays patients error",err)
-    }
-     
-   },[dispatch])
+  };
 
-   useEffect(()=>{
-    try{
-    dispatch(getDoctorShiftToday()).unwrap()
-    }
-    catch(err){
-      console.log("fetch todays doctors",err)
-    }
-   },[dispatch])
- const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'amount') return;
+  const daysOfWeek = [
+    { label: 'Sunday', value: 0 },
+    { label: 'Monday', value: 1 },
+    { label: 'Tuesday', value: 2 },
+    { label: 'Wednesday', value: 3 },
+    { label: 'Thursday', value: 4 },
+    { label: 'Friday', value: 5 },
+    { label: 'Saturday', value: 6 },
+  ];
 
-    setAppointment((prev) => ({
-        ...prev,
-        [name]: (() => {
-            if (name === "dayOfWeek" || name === "dOfW") {
-                return value === '' ? '' : parseInt(value, 10); //  keep '' don't convert to null
-            }
-            return value;
-        })(),
-    }));
-};
-   const handleSubmit = async (e) => {
-        e.preventDefault();
-       // Validate all required fields before dispatching
-  const errors = {};
-  if (!appointment.patientId) errors.patientId = "Please select a patient.";
-  if (!appointment.doctorId) errors.doctorId = "Please select a doctor.";
-  if (appointment.dayOfWeek === "" || appointment.dayOfWeek === null || appointment.dayOfWeek === undefined) {
-    errors.dayOfWeek = "Please select a day.";
-  }
-  if (!appointment.startTime) errors.startTime = "Please enter a start time.";
-  if (!appointment.notes) errors.notes = "Please enter notes.";
-  if (Object.keys(errors).length > 0) {
-    setFormErrors(prev => ({ ...prev, ...errors }));
-    return;
-  }
-        setFormErrors({ patientId: "", doctorId: "", dayOfWeek: "", startTime: "", notes: "" });
-        try {
-            const result = await dispatch(addAppointment({patientId:appointment.patientId,doctorId: appointment.doctorId,dayOfWeek: appointment.dayOfWeek, startTime: appointment.startTime.length === 5 ? `${appointment.startTime}:00` : appointment.startTime,notes: appointment.notes })).unwrap();
-     
-            if (!result.isSuccess) {
-                toast.error(result.errorMessage || 'Failed to add appointment.');
-                return;
-            }
-           setAppointment(initialState);
-            toast.success(result.data || 'Appointment added successfully.');
-        } catch (err) {
-       
-        
-          //  toast.error(err);
-                      setFormErrors({
-      doctorId: err?.DoctorId?.[0],
-      patientId: err?.PatientId?.[0],
-      dayOfWeek: err?.DayOfWeek?.[0],
-      startTime: err?.StartTime?.[0],
-      notes: err?.Notes?.[0],
-      
-    });
-
-
-        }
-    };
+  const selectedDOfW = watchSlots('dOfW');
 
   return (
-    <>
-    {console.log("available slots in component =>", doctorSlots)}
-        <Container className='mt-3 mb-3 justify-content-center'>
-        
-            
-    
-    <Row>
-      <Col md={8}>
-       <h3>Check Doctor availability </h3>
-            <Form onSubmit={availableSlots} className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
-                    <Form.Group controlId="docId" className='mb-3'>
-                        <Form.Label>Doctor </Form.Label>
-                        <Form.Select name='docId' type="text" value={appointment.docId ??''} onChange={ handleInputChange}
+    <Container className='mt-3 mb-3'>
 
-                     isInvalid={!!formErrors.docId} placeholder="Enter doctor" >
-                            <option value="">---Select Doctor---</option>
-                            {doctorsShift&&doctorsShift.map((doctor)=>(
-                            <option key={doctor.doctorId} value={doctor.doctorId}>{doctor.firstName}{doctor.lastName}{doctor.specialization}</option>
+      {/* ── Form 1: Check Availability ── */}
+      <Row>
+        <Col md={8}>
+          <h3>Check Doctor Availability</h3>
+          <Form onSubmit={handleSlotsSubmit(onCheckSlots)} className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
 
-                            ))}
-                            </Form.Select>
-                                    <Form.Control.Feedback type="invalid">
-          {formErrors.docId}    
-           </Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group controlId="dayOfWId" className='mb-3'>
-                        <Form.Label>Day of Week</Form.Label>
-                        <Form.Select name='dOfW' type="text" value={appointment.dOfW ??''}
-                         onChange={handleInputChange} 
-                         isInvalid={!!formErrors.dOfW} placeholder="Enter day of week" >
-                             <option value="">---Select a day---</option>
-                            <option value={0}>Sunday</option>
-                            <option value={1}>Monday</option>
-                            <option value={2}>Tuesday</option>
-                            <option value={3}>Wednesday</option>
-                            <option value={4}>Thursday</option>
-                            <option value={5}>Friday</option>
-                            <option value={6}>Saturday</option>
-                        </Form.Select>
-                            <Form.Control.Feedback type="invalid">
-          {formErrors.dOfW}
-           </Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group className='mb-3'>
-                    <Button variant="primary" type="submit">
-                        Check Available Slots
-                    </Button>
-                    </Form.Group>
-                
-            </Form >
-            </Col>
-            </Row>
-             <Row>
-           <Col md={8}>
-          {doctorSlots.length>0 ?
-         (
-        <Alert variant='info'>
-        
-              <p className="text-center" style={{fontSize:"20px"}}><i>Doctor Available Slots</i></p>
-              {appointment.dOfW !== "" && (
+            <Form.Group controlId="docId" className='mb-3'>
+              <Form.Label>Doctor</Form.Label>
+              <Form.Select
+                {...registerSlots('docId', { required: 'Please select a doctor.' })}
+                isInvalid={!!slotsErrors.docId}
+              >
+                <option value="">---Select Doctor---</option>
+                {doctorsShift?.map((doctor) => (
+                  <option key={doctor.doctorId} value={doctor.doctorId}>
+                    {doctor.firstName} {doctor.lastName} - {doctor.specialization}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">{slotsErrors.docId?.message}</Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group controlId="dOfW" className='mb-3'>
+              <Form.Label>Day of Week</Form.Label>
+              <Form.Select
+                {...registerSlots('dOfW', { required: 'Please select a day.' })}
+                isInvalid={!!slotsErrors.dOfW}
+              >
+                <option value="">---Select a day---</option>
+                {daysOfWeek.map((d) => (
+                  <option key={d.value} value={d.value}>{d.label}</option>
+                ))}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">{slotsErrors.dOfW?.message}</Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group className='mb-3'>
+              <Button variant="primary" type="submit">Check Available Slots</Button>
+            </Form.Group>
+
+          </Form>
+        </Col>
+      </Row>
+
+      {/* ── Slots Result ── */}
+      {slotsChecked && 
+      <Row>
+        <Col md={8}>
+          {doctorSlots.length > 0 ? (
+            <Alert variant='info'>
+              <p className="text-center" style={{ fontSize: "20px" }}><i>Doctor Available Slots</i></p>
+              {selectedDOfW !== "" && (
                 <div className="d-flex flex-wrap gap-2">
                   {doctorSlots.map((slot, index) => (
-                    <div key={index} className="border rounded p-2">
-                      {slot.availableSlot}
-                    </div>
+                    <div key={index} className="border rounded p-2">{slot.availableSlot}</div>
                   ))}
                 </div>
               )}
-          
-                </Alert>
-  ):(
-     <Alert variant='danger'><p>No slots available for this doctor</p></Alert>
-  )
-           }
-    </Col>
-        </Row>
-        
-            <h3>Book Appointment </h3>
-            <Row>
-                <Col md={8}>
-                 {patientsMessage&&
-               <Alert variant='info'>{patientsMessage}</Alert>
-            }
-                <Form onSubmit={handleSubmit} className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
-                    <Form.Group controlId="doctorId">
-                        <Form.Label>Doctor </Form.Label>
-                        <Form.Select name='doctorId' type="text" value={appointment.doctorId} onChange={handleInputChange}
+            </Alert>
+          ) : (
+            <Alert variant='danger'>No slots available for this doctor</Alert>
+          )}
+        </Col>
+      </Row>
+      }
 
-                         isInvalid={!!formErrors.doctorId} placeholder="Enter doctor" > 
-                            <option value="">---Select Doctor---</option>
-                            {doctorsShift&&doctorsShift.map((doctor)=>(
-                            <option key={doctor.doctorId} value={doctor.doctorId}>{doctor.firstName}{doctor.lastName}{doctor.specialization}</option>
+      {/* ── Form 2: Book Appointment ── */}
+      <h3>Book Appointment</h3>
+      <Row>
+        <Col md={8}>
+          {patientsMessage && <Alert variant='info'>{patientsMessage}</Alert>}
 
-                            ))}
-                            </Form.Select>
-                                    <Form.Control.Feedback type="invalid">
-          {formErrors.doctorId}
-           </Form.Control.Feedback>
-                    </Form.Group>
+          <Form onSubmit={handleApptSubmit(onBookAppointment)} className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
 
-                    <Form.Group controlId="patientId">
-                        <Form.Label>Patient </Form.Label>
-                        <Form.Select name='patientId' type="text" value={appointment.patientId} onChange={ handleInputChange}
+            <Form.Group controlId="doctorId">
+              <Form.Label>Doctor</Form.Label>
+              <Form.Select
+                {...registerAppt('doctorId', { required: 'Please select a doctor.' })}
+                isInvalid={!!apptErrors.doctorId}
+              >
+                <option value="">---Select Doctor---</option>
+                {doctorsShift?.map((doctor) => (
+                  <option key={doctor.doctorId} value={doctor.doctorId}>
+                    {doctor.firstName} {doctor.lastName} - {doctor.specialization}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">{apptErrors.doctorId?.message}</Form.Control.Feedback>
+            </Form.Group>
 
-                     isInvalid={!!formErrors.patientId} placeholder="Patient" >
-                            <option>---Select Patient---</option>
-                            {todaypatients&&
-                                todaypatients.map((patient)=>(
-                                  <option key={patient.patientId} value={patient.patientId}>{patient.firstName} {patient.lastName}</option>
+            <Form.Group controlId="patientId">
+              <Form.Label>Patient</Form.Label>
+              <Form.Select
+                {...registerAppt('patientId', { required: 'Please select a patient.' })}
+                isInvalid={!!apptErrors.patientId}
+              >
+                <option value="">---Select Patient---</option>
+                {todayPatients?.map((patient) => (
+                  <option key={patient.patientId} value={patient.patientId}>
+                    {patient.firstName} {patient.lastName}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">{apptErrors.patientId?.message}</Form.Control.Feedback>
+            </Form.Group>
 
-                                ))
-                            
-                                 } 
-                            </Form.Select>
-          <Form.Control.Feedback type="invalid">
-          {formErrors.patientId}
-           </Form.Control.Feedback>
-                    </Form.Group>
-                      <Form.Group controlId="dayOfWeekId">
-                        <Form.Label>Day of Week</Form.Label>
-                        <Form.Select name='dayOfWeek' type="text" value={appointment.dayOfWeek ??''}
-                         onChange={handleInputChange}
-                         
+            <Form.Group controlId="dayOfWeek">
+              <Form.Label>Day of Week</Form.Label>
+              <Form.Select
+                {...registerAppt('dayOfWeek', { required: 'Please select a day.' })}
+                isInvalid={!!apptErrors.dayOfWeek}
+              >
+                <option value="">---Select a day---</option>
+                {daysOfWeek.map((d) => (
+                  <option key={d.value} value={d.value}>{d.label}</option>
+                ))}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">{apptErrors.dayOfWeek?.message}</Form.Control.Feedback>
+            </Form.Group>
 
-   
-                      isInvalid={!!formErrors.dayOfWeek} placeholder="Enter day of week" >
-                             <option value="">---Select a day---</option>
-                            <option value={0}>Sunday</option>
-                            <option value={1}>Monday</option>
-                            <option value={2}>Tuesday</option>
-                            <option value={3}>Wednesday</option>
-                            <option value={4}>Thursday</option>
-                            <option value={5}>Friday</option>
-                            <option value={6}>Saturday</option>
-                        </Form.Select>
-                            <Form.Control.Feedback type="invalid">
-          {formErrors.dayOfWeek}
-           </Form.Control.Feedback>
-                    </Form.Group>
-                       <Form.Group name='startTime' value={appointment.startTime} controlId="formBasicNotes">
-                        <Form.Label>Start Time</Form.Label>
-                        <Form.Control name='startTime' type="time" value={appointment.startTime} onChange={ handleInputChange}
+            <Form.Group controlId="startTime">
+              <Form.Label>Start Time</Form.Label>
+              <Form.Control
+                type="time"
+                {...registerAppt('startTime', { required: 'Please enter a start time.' })}
+                isInvalid={!!apptErrors.startTime}
+              />
+              <Form.Control.Feedback type="invalid">{apptErrors.startTime?.message}</Form.Control.Feedback>
+            </Form.Group>
 
-              
-                   isInvalid={!!formErrors.startTime} placeholder="Enter start time" />
-                           <Form.Control.Feedback type="invalid">
-          {formErrors.startTime}
-           </Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group name='notes' value={appointment.notes} controlId="formBasicNotes">
-                        <Form.Label>Notes</Form.Label>
-                        <Form.Control name='notes' type="text" value={appointment.notes} onChange={ handleInputChange}
-                        isInvalid={!!formErrors.notes} placeholder="Enter notes" />
-    <Form.Control.Feedback type="invalid">
-          {formErrors.notes}
-           </Form.Control.Feedback>
-                    </Form.Group>
-                    <Button variant="primary" type="submit" className='mt-3'>
-                        Submit
-                    </Button>
-                </Form>
-                </Col>
-            </Row>
-        </Container>
-    </>
-  )
-}
+            <Form.Group controlId="notes">
+              <Form.Label>Notes</Form.Label>
+              <Form.Control
+                type="text"
+                {...registerAppt('notes', { required: 'Please enter notes.' })}
+                isInvalid={!!apptErrors.notes}
+                placeholder="Enter notes"
+              />
+              <Form.Control.Feedback type="invalid">{apptErrors.notes?.message}</Form.Control.Feedback>
+            </Form.Group>
 
-export default AppointmentForm
+            <Button variant="primary" type="submit" className='mt-3'>Submit</Button>
+
+          </Form>
+        </Col>
+      </Row>
+
+    </Container>
+  );
+};
+
+export default AppointmentForm;

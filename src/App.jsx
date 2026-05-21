@@ -19,6 +19,8 @@ import RegisterForm from './features/auth/components/RegisterForm'
 import ConfirmEmail from './features/auth/components/ConfirmEmail'
 import ResetPassword from './features/auth/components/ResetPassword'
 import ForegotPassword from './features/auth/components/ForegotPassword'
+import PaymentSuccess from './features/payment/components/PaymentSuccess'
+import {PaymentPage} from './features/payment/components/PaymentPage'
 function App() {
   
   return (
@@ -42,8 +44,10 @@ function App() {
        <Route path='/medicalrecord' element={<MedicalRecordForm/>}></Route>
        <Route path='/invoice' element={<InvoiceForm/>}></Route>
        <Route path='/payment' element={<PaymentForm/>}></Route>
-      <Route path='/visualcharts' element={<VisualCharts/>}></Route>
-
+       <Route path='/payment-success' element={<PaymentSuccess/>}></Route>
+        <Route path='/charts' element={<VisualCharts/>}></Route>
+        <Route path='/paymentpage' element={<PaymentPage/>}></Route>
+       
        --private routes --
        <Route path="/patientform" element={
         <PrivateRoute allowedRoles={['Admin','User']} requireAllRoles={false} fallbackUrl="/forbidden" loginUrl="/login">

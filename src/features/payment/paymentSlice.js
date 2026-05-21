@@ -44,9 +44,31 @@ export const addPayment = createAsyncThunk(
         }
     }
 );
+export const createPaymentIntent = createAsyncThunk(
+  'payment/createPaymentIntent',
+  async (invoiceData, { rejectWithValue }) => {
+    try {
+      const response = await paymentApi.PaymentIntentApi(invoiceData);
+      return response; // { clientSecret: '...' }
+    } catch (error) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+export const confirmPayment = createAsyncThunk(
+    'invoice/addInvoice',
+    async (payload, { rejectWithValue }) => {
+        try {
+            const response = await paymentApi.confirmPaymentApi( payload);
+            return response;
+        } catch (error) {
+            console.error('Error response status:', error.response?.status);
+            return rejectWithValue("Failed to confirm payment");
+        }});
 const paymentSlice=createSlice({
      name: 'payment',
   initialState,
+  clientSecret: null,
  reducers: {
     clearError: (state) => {
       state.error = null;
@@ -67,9 +89,21 @@ const paymentSlice=createSlice({
         state.loading=false;
         state.error=action.payload
     })
+     builder.addCase(createPaymentIntent.loading,(state)=>{
+        state.loading=true;
+        state.error=null
+    }).addCase(createPaymentIntent.fulfilled,(state,action)=>{
+        state.loading=false;
+        state.clientSecret=action.payload.clientSecret;
+        state.error=null
+    }).addCase(createPaymentIntent.rejected,(state,action)=>{
+        state.loading=false;
+        state.error=action.payload
+    })
   }
 })
 export const {clearMessge,clearError}=paymentSlice.actions;
 export const selectPaymentLoading = (state) => state.payment.loading;
 export const selectPaymentError = (state) => state.payment.error;
+export const selectClientSecret = (state) => state.payment.clientSecret;
 export default paymentSlice

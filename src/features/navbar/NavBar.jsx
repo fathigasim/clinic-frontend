@@ -34,10 +34,11 @@ const NavBar = () => {
           <Nav className="ms-auto align-items-center gap-3">
             <div className="d-flex align-items-center gap-3">
               <div className="d-flex gap-2">
-                <NavDropdown title="Orders" id="nav-dropdown-orders">
-                  <NavDropdown.Item as={Link} to="/orders">Orders List</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/orderByDateRep">Order By Date</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} to="/orders/charts">Order Stats</NavDropdown.Item>
+                <NavDropdown title="Clinic Management" id="nav-dropdown-orders">
+                  <NavDropdown.Item as={Link} to="/patientform">Patient Form</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/schedule">Doctor Schedule</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/appointmentform">Book appointment</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/medicalrecord">Medical Records</NavDropdown.Item>
                 </NavDropdown>
 
                 <NavDropdown title="Payments" id="nav-dropdown-payments">
