@@ -14,13 +14,14 @@ import MedicalRecordForm from './features/medicalrecord/components/MedicalRecord
 import InvoiceForm from './features/invoice/components/InvoiceForm'
 import PaymentForm from './features/payment/components/PaymentForm'
 import TodayAppointments from './features/appointment/components/TodayAppointments'
-import VisualCharts from './features/charts/VisualCharts'
+import MonthlyInvoiceCharts from './features/charts/MonthlyInvoiceCharts'
 import RegisterForm from './features/auth/components/RegisterForm'
 import ConfirmEmail from './features/auth/components/ConfirmEmail'
 import ResetPassword from './features/auth/components/ResetPassword'
 import ForegotPassword from './features/auth/components/ForegotPassword'
 import PaymentSuccess from './features/payment/components/PaymentSuccess'
 import {PaymentPage} from './features/payment/components/PaymentPage'
+import WeeklyInvoiceCharts from './features/charts/WeeklyInvoiceCharts'
 function App() {
   
   return (
@@ -45,7 +46,8 @@ function App() {
        <Route path='/invoice' element={<InvoiceForm/>}></Route>
        <Route path='/payment' element={<PaymentForm/>}></Route>
        <Route path='/payment-success' element={<PaymentSuccess/>}></Route>
-        <Route path='/charts' element={<VisualCharts/>}></Route>
+        <Route path='/MonthlyStats' element={<MonthlyInvoiceCharts/>}></Route>
+          <Route path='/WeeklyStats' element={<WeeklyInvoiceCharts/>}></Route>
         <Route path='/paymentpage' element={<PaymentPage/>}></Route>
        
        --private routes --

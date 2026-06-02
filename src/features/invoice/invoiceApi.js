@@ -1,7 +1,18 @@
 import api from "../../services/api";
 
 export const invoiceApi = ({
-
+       getWeeklyInvoicesApi: async ( ) => {
+    const response = await api.get(`/Invoice/WeeklyInvoices`);
+    return response.data;
+},
+    getMonthlyInvoicesApi: async ( ) => {
+    const response = await api.get(`/Invoice/MonthlyInvoices`);
+    return response.data;
+},
+getAllInvoicesApi: async ( ) => {
+    const response = await api.get(`/Invoice`);
+    return response.data;
+},
      addInvoiceApi:async(payload)=>{
 
      const response = await api.post('/Invoice', payload);

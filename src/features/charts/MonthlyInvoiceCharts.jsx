@@ -1,3 +1,6 @@
+import {selectMonthlyInvoices,getMonthlyInvoices} from '../invoice/invoiceSlice'
+import { useDispatch,useSelector } from 'react-redux';
+import { useEffect } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
          CartesianGrid, Tooltip, Legend,LineChart,Line } from 'recharts';
 
@@ -7,18 +10,33 @@ const data = [
   { month: 'Mar', revenue: 5100, cost: 2900 },
 ];
 
-export default function VisualCharts() {
+export default function MonthlyInvoiceCharts() {
+   
+  const dispatch=useDispatch();
+  const monthlyInvoices=useSelector(selectMonthlyInvoices);
+ 
+  useEffect(()=>{
+     const getAllPatientInvoices =async()=>{
+       await dispatch(getMonthlyInvoices()).unwrap()
+     }
+
+     getAllPatientInvoices()
+  },[dispatch])
+
+
+
   return (
     <>
+    {console.log('Checking all invoices loaded',monthlyInvoices)}
     <ResponsiveContainer width="100%" height={300} className={"mt-5"}>
-      <BarChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+      <BarChart data={monthlyInvoices} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-        <XAxis dataKey="month" />
+        <XAxis dataKey="invoiceMonth" />
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="revenue" fill="#378ADD" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="cost" fill="#73726c" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="invoiceMonthTotal" fill="#378ADD" radius={[4, 4, 0, 0]} />
+        {/* <Bar dataKey="cost" fill="#73726c" radius={[4, 4, 0, 0]} /> */}
       </BarChart>
 
 

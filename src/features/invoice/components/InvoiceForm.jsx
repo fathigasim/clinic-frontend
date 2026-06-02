@@ -66,22 +66,23 @@ const InvoiceForm = () => {
 
  
    const handleSubmitInvoice = async (data,e) => {
+
      e.preventDefault();
- 
+        
      try {
        //const result = await dispatch(addInvoice(invoice)).unwrap();
        const result = await dispatch(addInvoice({appointmentNumber:data.appointmentNumber,totalAmount:data.totalAmount})).unwrap();
        console.log('Add invoice result:', result);
         await dispatch(createPaymentIntent({
         totalAmount: data.totalAmount,
-        invoiceId: result.id, // whatever your backend returns
+        invoiceId: result.data.id, // whatever your backend returns
       })).unwrap();
 
-      // navigate('/paymentpage', { state: { invoiceId: result.data.invoiceId } }); 
-        navigate('/paymentpage'); 
+      navigate('/paymentpage', { state: { invoiceId: result.data.invoiceId } }); 
+      // navigate('/paymentpage'); 
        // Clear form only on success
         console.log("Invoice added successfully:", result.data);
-         toast.success(result || "Invoice added successfully.");
+         toast.success(result.data.invoiceNo +''+'Added successfully');
           reset(); // Clear form fields
        
       

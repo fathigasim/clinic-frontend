@@ -9,5 +9,10 @@ confirmPaymentApi: async(paymentIntentId)=>
 {
    const response=  await  api.post('/payments/confirm-payment',{paymentIntentId});
    return response.data;
+},
+PaymentIntentApi: async(invoiceData)=>
+{
+   const response=  await  api.post('/payments/create-payment-intent',invoiceData);
+   return response.data;
 }
 }

@@ -3,11 +3,12 @@ import { paymentApi } from "./PaymentApi";
 const initialState={
     message:null,
     error:null,
-    loading:false
+    loading:false,
+     clientSecret: null
 }
 
 export const addPayment = createAsyncThunk(
-    'invoice/addInvoice',
+    'payment/addPayment',
     async (payload, { rejectWithValue }) => {
         try {
             const response = await paymentApi.addPaymentApi( payload);
@@ -56,7 +57,7 @@ export const createPaymentIntent = createAsyncThunk(
   }
 );
 export const confirmPayment = createAsyncThunk(
-    'invoice/addInvoice',
+    'payment/confirmPayment',
     async (payload, { rejectWithValue }) => {
         try {
             const response = await paymentApi.confirmPaymentApi( payload);
@@ -68,7 +69,7 @@ export const confirmPayment = createAsyncThunk(
 const paymentSlice=createSlice({
      name: 'payment',
   initialState,
-  clientSecret: null,
+
  reducers: {
     clearError: (state) => {
       state.error = null;
@@ -79,17 +80,17 @@ const paymentSlice=createSlice({
    }
   },
   extraReducers:(builder)=>{
-    builder.addCase(addPayment.loading,(state)=>{
+    builder.addCase(addPayment.pending,(state)=>{
         state.loading=true;
-        state.error=null
-    }).addCase(addPayment.fulfilled,(state,action)=>{
+        state.error=null;
+    }).addCase(addPayment.fulfilled,(state)=>{
         state.loading=false;
         state.error=null
     }).addCase(addPayment.rejected,(state,action)=>{
         state.loading=false;
         state.error=action.payload
     })
-     builder.addCase(createPaymentIntent.loading,(state)=>{
+     builder.addCase(createPaymentIntent.pending,(state)=>{
         state.loading=true;
         state.error=null
     }).addCase(createPaymentIntent.fulfilled,(state,action)=>{
@@ -106,4 +107,4 @@ export const {clearMessge,clearError}=paymentSlice.actions;
 export const selectPaymentLoading = (state) => state.payment.loading;
 export const selectPaymentError = (state) => state.payment.error;
 export const selectClientSecret = (state) => state.payment.clientSecret;
-export default paymentSlice
+export default paymentSlice.reducer;

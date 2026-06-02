@@ -2,17 +2,50 @@ import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
 import { invoiceApi } from "./invoiceApi";
 
 
+export const getWeeklyInvoices = createAsyncThunk(
+    'invoice/getWeeklyInvoices',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await invoiceApi.getWeeklyInvoicesApi();
+            return response.data; // already .data from the API layer
+        } catch (error) {
+            return rejectWithValue(error?.response?.data || "Failed to fetch monthly invoices");
+        }
+    }
+);
+export const getMonthlyInvoices = createAsyncThunk(
+    'invoice/getMonthlyInvoices',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await invoiceApi.getMonthlyInvoicesApi();
+            return response.data; // already .data from the API layer
+        } catch (error) {
+            return rejectWithValue(error?.response?.data || "Failed to fetch monthly invoices");
+        }
+    }
+);
+export const getAllInvoices = createAsyncThunk(
+    'invoice/getAllInvoice',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await invoiceApi.getAllInvoicesApi();
+            return response.data; // already .data from the API layer
+        } catch (error) {
+            return rejectWithValue(error?.response?.data || "Failed to fetch all invoices");
+        }
+    }
+);
 
 export const addInvoice = createAsyncThunk(
     'invoice/addInvoice',
     async (payload, { rejectWithValue }) => {
         try {
             const response = await invoiceApi.addInvoiceApi( {
-      AppointmentNo: payload.appointmentNumber,  // ← map here
+      AppointmentNo: payload.appointmentNumber,  //
       TotalAmount: payload.totalAmount,
     });
     console.log(`Add Invoice Thunk API response: ${response.data}`);
-            return response.data;
+            return response;
         } catch (error) {
            console.error('Error response status:', error.response?.status);
       if (error.response?.status === 409) {
@@ -79,6 +112,9 @@ const invoiceSlice = createSlice({
     name: 'invoice',
     initialState: {
         invoice:null,
+        monthlyInvoices:[],
+        weeklyInvoices:[],
+        allInvoices:[],
       invoices:[],  
      loading: false,
      error: null,
@@ -94,19 +130,69 @@ const invoiceSlice = createSlice({
 },
     extraReducers: (builder) => {
         builder
+         .addCase(getWeeklyInvoices.pending, (state) => {
+                state.loading=true;
+                state.error=null;
+            })
+            .addCase(getWeeklyInvoices.fulfilled, (state, action) => {
+                // Handle successful invoice addition, e.g., update state with new invoice
+             
+                state.weeklyInvoices=action.payload;
+                  state.loading=false;
+                state.error=null;
+            })
+            .addCase(getWeeklyInvoices.rejected, (state) => {
+                
+                state.loading=false;
+                state.error=null;
+            })
+          .addCase(getMonthlyInvoices.pending, (state) => {
+                state.loading=true;
+                state.error=null;
+            })
+            .addCase(getMonthlyInvoices.fulfilled, (state, action) => {
+                // Handle successful invoice addition, e.g., update state with new invoice
+             
+                state.monthlyInvoices=action.payload;
+                  state.loading=false;
+                state.error=null;
+            })
+            .addCase(getMonthlyInvoices.rejected, (state) => {
+                
+                state.loading=false;
+                state.error=null;
+            })
+           .addCase(getAllInvoices.pending, (state) => {
+                state.loading=true;
+                state.error=null;
+            })
+            .addCase(getAllInvoices.fulfilled, (state, action) => {
+                // Handle successful invoice addition, e.g., update state with new invoice
+             
+                state.allInvoices=action.payload;
+                  state.loading=false;
+                state.error=null;
+            })
+            .addCase(getAllInvoices.rejected, (state) => {
+                
+                state.loading=false;
+                state.error=null;
+            })
             .addCase(addInvoice.pending, (state) => {
                 state.loading=true;
                 state.error=null;
             })
             .addCase(addInvoice.fulfilled, (state, action) => {
                 // Handle successful invoice addition, e.g., update state with new invoice
-                state.message=action.payload;
+             
+                state.message=action.payload.errorMessage;
                   state.loading=false;
                 state.error=null;
             })
-            .addCase(addInvoice.rejected, (state, action) => {
+            .addCase(addInvoice.rejected, (state,action) => {
+                console.log('Checking result for rejection thunk',action.payload)
                 state.loading=false;
-                state.error=action.payload;
+                state.error=null;
             })  .addCase(getInvoiceByInvoiceNo.pending, (state) => {
    state.loading=true;
                 state.error=null;
@@ -146,6 +232,9 @@ const invoiceSlice = createSlice({
 export const { resetInvoice } = invoiceSlice.actions;
 
 export const selectInvoice=(state) => state.invoice.invoice;
+export const selectWeeklyInvoices=(state) => state.invoice.weeklyInvoices;
+export const selectMonthlyInvoices=(state) => state.invoice.monthlyInvoices;
+export const selectAllInvoices=(state) => state.invoice.allInvoices;
 export const selectLatestInvoices=(state) => state.invoice.invoices;
 export const selectLoadingInvoices=(state) => state.invoice.loading;
 export const selectErrorInvoices=(state) => state.invoice.error;
