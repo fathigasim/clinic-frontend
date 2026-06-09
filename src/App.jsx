@@ -14,14 +14,19 @@ import MedicalRecordForm from './features/medicalrecord/components/MedicalRecord
 import InvoiceForm from './features/invoice/components/InvoiceForm'
 import PaymentForm from './features/payment/components/PaymentForm'
 import TodayAppointments from './features/appointment/components/TodayAppointments'
-import MonthlyInvoiceCharts from './features/charts/MonthlyInvoiceCharts'
+import MonthlyInvoiceCharts from './features/invoice/components/MonthlyInvoiceCharts'
+import DailyInvoiceCharts from './features/invoice/components/DailyInvoiceCharts'
+import WeeklyInvoiceCharts from './features/invoice/components/WeeklyInvoiceCharts'
 import RegisterForm from './features/auth/components/RegisterForm'
 import ConfirmEmail from './features/auth/components/ConfirmEmail'
 import ResetPassword from './features/auth/components/ResetPassword'
 import ForegotPassword from './features/auth/components/ForegotPassword'
 import PaymentSuccess from './features/payment/components/PaymentSuccess'
 import {PaymentPage} from './features/payment/components/PaymentPage'
-import WeeklyInvoiceCharts from './features/charts/WeeklyInvoiceCharts'
+import Patients from './features/patient/components/Patients'
+import NotFound from './components/NotFound';
+import InvoiceByDateReport from './features/invoice/components/InvoiceByDateReport'
+
 function App() {
   
   return (
@@ -31,7 +36,8 @@ function App() {
        <Routes>
      
      <Route path="/" element={<HomePage/>} />
-    
+       
+       <Route path="/patients" element={<Patients/>} />
        <Route path="/doctorform" element={<DoctorForm/>} />
        <Route path="/register" element={<RegisterForm/>} />
        <Route path="/login" element={<LoginForm/>} />
@@ -46,13 +52,16 @@ function App() {
        <Route path='/invoice' element={<InvoiceForm/>}></Route>
        <Route path='/payment' element={<PaymentForm/>}></Route>
        <Route path='/payment-success' element={<PaymentSuccess/>}></Route>
-        <Route path='/MonthlyStats' element={<MonthlyInvoiceCharts/>}></Route>
-          <Route path='/WeeklyStats' element={<WeeklyInvoiceCharts/>}></Route>
+        <Route path='/Invoice/MonthlyStats' element={<MonthlyInvoiceCharts/>}></Route>
+          <Route path='/Invoice/WeeklyStats' element={<WeeklyInvoiceCharts/>}></Route>
+          <Route path='/Invoice/DailyStats' element={<DailyInvoiceCharts/>}></Route>
+          <Route path='/Invoice/InvoiceByDate' element={<InvoiceByDateReport/>}></Route>
         <Route path='/paymentpage' element={<PaymentPage/>}></Route>
+        <Route path='*' element={<NotFound/>}></Route>
        
        --private routes --
        <Route path="/patientform" element={
-        <PrivateRoute allowedRoles={['Admin','User']} requireAllRoles={false} fallbackUrl="/forbidden" loginUrl="/login">
+        <PrivateRoute allowedRoles={['Admin']} requireAllRoles={false} fallbackUrl="/forbidden" loginUrl="/login">
           <PatientForm/>
         </PrivateRoute>
        

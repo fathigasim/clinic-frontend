@@ -60,13 +60,14 @@ const NavBar = () => {
                 </>
               )}
             </div>
-
+           {!isAuthenticated && 
             <div className="d-flex align-items-center gap-2">
               <Nav.Link as={Link} to="/login">Login</Nav.Link>
               <Button as={Link} to="/register" variant="primary" size="sm">
                 Register
               </Button>
             </div>
+            }
           </Nav>
         </Navbar.Collapse>
       </Container>

@@ -18,7 +18,6 @@ const InvoiceForm = () => {
     handleSubmit,
     formState: { errors:invoiceErrors },
     reset,
-    watch,
   } = useForm();
     // const [invoice, setInvoice] = useState(initialState);
     // const [formErrors, setFormErrors] = useState({});

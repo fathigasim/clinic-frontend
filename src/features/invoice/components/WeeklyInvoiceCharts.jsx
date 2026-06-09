@@ -1,27 +1,32 @@
-import {selectWeeklyInvoices,getWeeklyInvoices} from '../invoice/invoiceSlice'
+import {selectWeeklyInvoices,getWeeklyInvoices,selectWeeklyInvoicesStatus} from '../invoiceSlice'
 import { useDispatch,useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
          CartesianGrid, Tooltip, Legend,LineChart,Line } from 'recharts';
 
-const data = [
-  { month: 'Jan', revenue: 4200, cost: 2800 },
-  { month: 'Feb', revenue: 5800, cost: 3100 },
-  { month: 'Mar', revenue: 5100, cost: 2900 },
-];
+// const data = [
+//   { month: 'Jan', revenue: 4200, cost: 2800 },
+//   { month: 'Feb', revenue: 5800, cost: 3100 },
+//   { month: 'Mar', revenue: 5100, cost: 2900 },
+// ];
 
 export default function WeeklyInvoiceCharts() {
-   
+
   const dispatch=useDispatch();
   const weeklyInvoices=useSelector(selectWeeklyInvoices);
- 
-  useEffect(()=>{
-     const getAllPatientWeeklyInvoices =async()=>{
-       await dispatch(getWeeklyInvoices()).unwrap()
-     }
+  const status = useSelector(selectWeeklyInvoicesStatus);
+     useEffect(() => {
+       if (status === 'idle') {
+          dispatch(getWeeklyInvoices())
+       }
+   }, [dispatch, status]);
+    // useEffect(()=>{
+    //    const getAllPatientWeeklyInvoices =async()=>{
+    //      await dispatch(getWeeklyInvoices()).unwrap()
+    //    }
 
-     getAllPatientWeeklyInvoices()
-  },[dispatch])
+    //    getAllPatientWeeklyInvoices()
+    // },[dispatch])
 
 
 
@@ -29,7 +34,7 @@ export default function WeeklyInvoiceCharts() {
     <>
     {console.log('Checking all invoices loaded',weeklyInvoices)}
     <ResponsiveContainer width="100%" height={300} className={"mt-5"}>
-      <BarChart data={weeklyInvoices} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+      <BarChart data={weeklyInvoices} >
         <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
         <XAxis dataKey="weeklyInvoice" />
         <YAxis />

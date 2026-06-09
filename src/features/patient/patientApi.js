@@ -1,6 +1,11 @@
  import api from '../../services/api';
  
  export const patientApi = {
+   fetchPatientsApi: async ({ q,page, pageSize }) => {
+    const response = await api.get('/Patient',{params:{q,page,pageSize}});
+    console.log(`api todays patients data : ${response.data}`)
+    return response.data;
+  },
  fetchTodaysPatientsApi: async () => {
     const response = await api.get('/Patient/TodaysPatients');
     console.log(`api todays patients data : ${response.data}`)

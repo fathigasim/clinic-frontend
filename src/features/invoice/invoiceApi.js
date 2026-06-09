@@ -1,6 +1,15 @@
 import api from "../../services/api";
 
 export const invoiceApi = ({
+// Invoice By Date Report
+         getInvoicesByDateApi: async ({page,pageSize,date} ) => {
+    const response = await api.get(`/Invoice/InvoicesByDate`,{params:{date,page,pageSize}});
+    return response.data;
+},
+          getDailyInvoicesApi: async ( ) => {
+    const response = await api.get(`/Invoice/DailyInvoices`);
+    return response.data;
+},
        getWeeklyInvoicesApi: async ( ) => {
     const response = await api.get(`/Invoice/WeeklyInvoices`);
     return response.data;

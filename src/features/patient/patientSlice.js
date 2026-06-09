@@ -21,9 +21,32 @@ import { patientApi } from './patientApi';
 //     }
 //   }
 // );
-
+export const getPatients = createAsyncThunk(
+  'patients/getpatients',
+  async (payload,{rejectWithValue}) => {
+    try {
+      
+      const result = await patientApi.fetchPatientsApi(payload);
+      console.log('Thunk get patients result => :', result);
+      return result.data;
+    } catch (error) {
+      console.error('Thunk get patients error message=>', error.response.data);
+         if(!error.response){
+      return rejectWithValue("Sever network error");
+         }
+            if(!error.response.data){
+           
+      return rejectWithValue("Patients not avaiable");
+         }
+             if(error.response.data){
+           const errors=   error.response.data.errors
+      return rejectWithValue(errors);
+         }
+    }
+  }
+);
 export const getTodaysPatients = createAsyncThunk(
-  'product/fetchtodayspatients',
+  'patients/gettodayspatients',
   async (_,{rejectWithValue}) => {
     try {
       
@@ -48,7 +71,7 @@ export const getTodaysPatients = createAsyncThunk(
 );
 
 export const addPatient = createAsyncThunk(
-  'patient/addPatient',
+  'patients/addPatient',
   async (patient, { rejectWithValue }) => {
     try {
       const result = await patientApi.addPatientApi(patient);
@@ -86,6 +109,7 @@ export const addPatient = createAsyncThunk(
 // Initial state
 const initialState = {
   todayspatients:[],
+  patientsResult:null,
   message:null,
   loading: false,
   error: null,
@@ -108,6 +132,20 @@ const patientSlice = createSlice({
   extraReducers: (builder) => {
     builder
    
+      .addCase(getPatients.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      }).addCase(getPatients.fulfilled, (state,action) => {
+        console.log('fullfiled payload message ',action.payload);
+       state.patientsResult=action.payload;
+        state.loading = false;
+        state.error = null;
+      }).addCase(getPatients.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.errorMessage || "Failed to get patients";
+        state.message = null;
+      }) 
       .addCase(addPatient.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -147,6 +185,7 @@ clearMessge
 } = patientSlice.actions;
 
 //  Selectors
+export const selectPatientsResult = (state) => state.patient.patientsResult;
 export const selectTodaysPatients = (state) => state.patient.todayspatients;
 export const selectPatientMessage = (state) => state.patient.message;
 export const selectPatientLoading = (state) => state.patient.loading;
