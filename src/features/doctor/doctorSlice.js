@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { doctorApi } from './doctorApi';
-import { data } from 'react-router';
+
 
 
 
@@ -17,6 +17,22 @@ export const getAllDoctors = createAsyncThunk(
     }
   }
 );
+
+export const getDoctorsSchedule = createAsyncThunk(
+  'doctor/getDoctorsSchedule',
+  async () => {
+    try {
+      const result = await doctorApi.getDoctorsScheduleApi();
+      console.log('Doctors Schedule Data:', result);
+      return result;
+    } catch (error) {
+      console.error('Error response data:', error.response?.data);
+      throw error;
+    }
+  }
+);
+
+
 
 export const getDoctorsAvailableSlots = createAsyncThunk(
   'doctor/getDoctorsAvailableSlots',
@@ -76,11 +92,21 @@ export const addDoctorSchedule = createAsyncThunk(
       console.log('Added Doctor Schedule Data:', result);
       return result;
     } catch (error) {
-      console.error('Error response data:', error.response?.data);
-        rejectWithValue(error.response?.data || error.message || "Failed to add patient");
+      // console.error('Error response data:', error.response?.data);
+      //   rejectWithValue(error.response?.data || error.message || "Failed to add patient");
       //  Handle array of errors
       const errors = error.response.data;
-  console.log("testing errors before reject with values",errors)
+if (error.response?.status === 400) {
+  const data = error.response?.data;
+  
+  const errorMessage = 
+    data?.errors?.[""] ?.[0]      // FluentValidation model-level error
+    ?? data?.message               // custom { message } response
+    ?? data?.title                 // fallback to "ValidationError"
+    ?? "Failed to add schedule. Please check your input and try again.";
+
+  return rejectWithValue({ message: errorMessage });
+}
       if (Array.isArray(errors)) {
         // If it's an array, join into a string or return as-is
         return rejectWithValue(errors);
@@ -105,6 +131,7 @@ export const addDoctorSchedule = createAsyncThunk(
 const initialState = {
 
   doctors: [],
+  doctorSchedule: [],
   data: null,
   loading: false,
   error: null,
@@ -124,6 +151,18 @@ const doctorSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(getDoctorsSchedule.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(getDoctorsSchedule.fulfilled, (state,action) => {
+        console.log("getDoctorsSchedule.fulfilled result",action.payload)
+       state.doctorSchedule=action.payload
+        state.loading = false;
+        state.error = null;
+      }).addCase(getDoctorsSchedule.rejected, (state) => {
+        state.loading = false;
+        state.error = null;
+      }) 
     .addCase(getAllDoctors.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -184,6 +223,6 @@ export const selectAllDoctors = (state) => state.doctor.doctors;
 export const selectAvailableSlots = (state) => state.doctor.availableSlots;
 export const selectDoctorLoading = (state) => state.doctor.loading;
 export const selectDoctorError = (state) => state.doctor.error;
-
+export const selectDoctorSchedule = (state) => state.doctor.doctorSchedule;
 
 export default doctorSlice.reducer;

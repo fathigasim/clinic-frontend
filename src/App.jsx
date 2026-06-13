@@ -26,6 +26,7 @@ import {PaymentPage} from './features/payment/components/PaymentPage'
 import Patients from './features/patient/components/Patients'
 import NotFound from './components/NotFound';
 import InvoiceByDateReport from './features/invoice/components/InvoiceByDateReport'
+import DoctorsSchedule from './features/doctor/components/DoctorsSchedule'
 
 function App() {
   
@@ -45,7 +46,8 @@ function App() {
        <Route path="/auth/forgot-password" element={<ForegotPassword/>} />
        <Route path="/auth/reset-password" element={<ResetPassword/>} />
        <Route path='/forbidden' element={<Forbidden/>}></Route>
-       <Route path='/schedule' element={<DoctorSchedule/>}></Route>
+       <Route path='/doctor/schedule' element={<DoctorSchedule/>}></Route>  
+        <Route path='/doctor/weeklyschedule' element={<DoctorsSchedule/>}></Route>
        <Route path='/appointmentform' element={<AppointmentForm/>}></Route>
        <Route path='/appointments' element={<TodayAppointments/>}></Route>
        <Route path='/medicalrecord' element={<MedicalRecordForm/>}></Route>

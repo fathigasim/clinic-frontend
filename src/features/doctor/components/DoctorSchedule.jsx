@@ -5,7 +5,8 @@ import {Col,Row,Container,Form,FormControl,FormGroup, FormSelect, Button} from '
 import {toast} from 'react-toastify'
 const DoctorSchedule = () => {
    const [doctorId,setDoctorId] =useState("");
-   const [dayOfWeek,setDayOfWeek] =useState("");
+  //  const [dayOfWeek,setDayOfWeek] =useState("");
+  const [scheduleDate,setScheduleDate] =useState("");
    const [startTime,setStartTime] =useState("");
    const [endTime,setEndTime] =useState("");
     const [formErrors, setFormErrors] = useState({});
@@ -24,14 +25,14 @@ const DoctorSchedule = () => {
 const DoctorScheduleForm = async()=>{
 try{
   console.log("Checking both start time and end time:", startTime, endTime)
- var result=  await dispatch(addDoctorSchedule({doctorId,dayOfWeek,startTime: startTime.length === 5 ? `${startTime}:00` : startTime,endTime: endTime.length === 5 ? `${endTime}:00` : endTime})).unwrap();
+ var result=  await dispatch(addDoctorSchedule({doctorId,scheduleDate,startTime: startTime.length === 5 ? `${startTime}:00` : startTime,endTime: endTime.length === 5 ? `${endTime}:00` : endTime})).unwrap();
     console.log("schedule component result data =>",result)
-    if(!result.isSuccess){
+    // if(!result.isSuccess){
     
-        toast.error(result.errorMessage || "Failed to add schedule.");
-        return;
-    }
-     setDayOfWeek("");
+    //     toast.error(result.errorMessage || "Failed to add schedule.");
+    //     return;
+    // }
+     setScheduleDate("");
      setDoctorId("");
      setStartTime("");
      setEndTime("");
@@ -39,8 +40,8 @@ try{
     }
     catch(err){
 
-        console.log(err)
-        toast.error("Failed to add schedule.");
+        console.log('Check errors in the catch block:',err)
+        toast.error(err.message||"Failed to add schedule.");
     }
 }
   return (
@@ -61,7 +62,7 @@ try{
                     ))}
                 </FormSelect>
              </FormGroup>
-            <FormGroup className='mb-3'>
+            {/* <FormGroup className='mb-3'>
                 <FormSelect value={dayOfWeek} onChange={(e)=>{setDayOfWeek(parseInt(e.target.value))
 
                      clearFieldError("dayOfWeek")
@@ -75,6 +76,14 @@ try{
                       <option value={5}>Friday</option>
                       <option value={6}>Saturday</option>
                 </FormSelect>
+            </FormGroup> */}
+              <FormGroup className='mb-3'>
+                <FormControl type='date' value={scheduleDate}  onChange={(e)=>{setScheduleDate(e.target.value)
+
+                   clearFieldError("scheduleDate") 
+                }}  >
+
+                </FormControl>
             </FormGroup>
             <FormGroup className='mb-3'>
                 <FormControl type='time' value={startTime}  onChange={(e)=>{setStartTime(e.target.value)
