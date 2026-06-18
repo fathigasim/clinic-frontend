@@ -21,48 +21,71 @@ import RegisterForm from './features/auth/components/RegisterForm'
 import ConfirmEmail from './features/auth/components/ConfirmEmail'
 import ResetPassword from './features/auth/components/ResetPassword'
 import ForegotPassword from './features/auth/components/ForegotPassword'
+import ServerError from './features/auth/components/ServerError'
 import PaymentSuccess from './features/payment/components/PaymentSuccess'
 import {PaymentPage} from './features/payment/components/PaymentPage'
+import Dashboard from './features/home/Dashboard'
 import Patients from './features/patient/components/Patients'
 import NotFound from './components/NotFound';
 import InvoiceByDateReport from './features/invoice/components/InvoiceByDateReport'
 import DoctorsSchedule from './features/doctor/components/DoctorsSchedule'
-
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from './features/auth/authSlice';
+import { tokenService } from './services/tokenService';
+import { initializeAuth } from './features/auth/authSlice';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 function App() {
-  
+    const token = tokenService.getAccessToken();
+
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const role=tokenService.getUserRoles(token);
+    const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(initializeAuth());
+  }, []);
   return (
     <>
      <BrowserRouter>
      <NavBar/>
        <Routes>
-     
+     {(!isAuthenticated || isAuthenticated && !role.includes('Admin')) &&
+      <Route path="/" element={<HomePage/>} />
+     }
+      {isAuthenticated && !role.includes('Admin') &&
      <Route path="/" element={<HomePage/>} />
-       
-       <Route path="/patients" element={<Patients/>} />
-       <Route path="/doctorform" element={<DoctorForm/>} />
-       <Route path="/register" element={<RegisterForm/>} />
-       <Route path="/login" element={<LoginForm/>} />
+     }
+     {isAuthenticated && role.includes('Admin') &&
+     <Route path="/" element={<Dashboard/>} />
+     }
+       <Route path="/patients/patients-list" element={<Patients/>} />
+       <Route path="/doctors/doctor-form" element={<DoctorForm/>} />
+       <Route path="/auth/register" element={<RegisterForm/>} />
+       <Route path="/auth/login" element={<LoginForm/>} />
        <Route path="/auth/confirm-email" element={<ConfirmEmail/>} />
        <Route path="/auth/forgot-password" element={<ForegotPassword/>} />
        <Route path="/auth/reset-password" element={<ResetPassword/>} />
-       <Route path='/forbidden' element={<Forbidden/>}></Route>
-       <Route path='/doctor/schedule' element={<DoctorSchedule/>}></Route>  
-        <Route path='/doctor/weeklyschedule' element={<DoctorsSchedule/>}></Route>
-       <Route path='/appointmentform' element={<AppointmentForm/>}></Route>
-       <Route path='/appointments' element={<TodayAppointments/>}></Route>
-       <Route path='/medicalrecord' element={<MedicalRecordForm/>}></Route>
-       <Route path='/invoice' element={<InvoiceForm/>}></Route>
-       <Route path='/payment' element={<PaymentForm/>}></Route>
-       <Route path='/payment-success' element={<PaymentSuccess/>}></Route>
-        <Route path='/Invoice/MonthlyStats' element={<MonthlyInvoiceCharts/>}></Route>
-          <Route path='/Invoice/WeeklyStats' element={<WeeklyInvoiceCharts/>}></Route>
-          <Route path='/Invoice/DailyStats' element={<DailyInvoiceCharts/>}></Route>
-          <Route path='/Invoice/InvoiceByDate' element={<InvoiceByDateReport/>}></Route>
-        <Route path='/paymentpage' element={<PaymentPage/>}></Route>
+       <Route path='/auth/forbidden' element={<Forbidden/>}></Route>
+       <Route path='/ServerError' element={<ServerError/>}></Route>
+       <Route path='/Doctors/schedule' element={<DoctorSchedule/>}></Route>  
+        <Route path='/Doctors/weekly-schedule' element={<DoctorsSchedule/>}></Route>
+       <Route path='/Appointments/appointmentform' element={<AppointmentForm/>}></Route>
+       <Route path='/Appointments/appointments' element={<TodayAppointments/>}></Route>
+       <Route path='/doctors/medical-records' element={<MedicalRecordForm/>}></Route>
+       <Route path='/invoice/invoice-form' element={<InvoiceForm/>}></Route>
+       <Route path='/payments/payment-form' element={<PaymentForm/>}></Route>
+       <Route path='/payments/payment-success' element={<PaymentSuccess/>}></Route>
+        <Route path='/invoice/MonthlyStats' element={<MonthlyInvoiceCharts/>}></Route>
+          <Route path='/invoice/WeeklyStats' element={<WeeklyInvoiceCharts/>}></Route>
+          <Route path='/invoice/DailyStats' element={<DailyInvoiceCharts/>}></Route>
+          <Route path='/invoice/InvoiceByDate' element={<InvoiceByDateReport/>}></Route>
+        <Route path='/payments/paymentpage' element={<PaymentPage/>}></Route>
+         <Route path='/management/dashboard' element={<Dashboard/>}></Route>
         <Route path='*' element={<NotFound/>}></Route>
        
        --private routes --
-       <Route path="/patientform" element={
+       <Route path="/patients/patient-form" element={
         <PrivateRoute allowedRoles={['Admin']} requireAllRoles={false} fallbackUrl="/forbidden" loginUrl="/login">
           <PatientForm/>
         </PrivateRoute>

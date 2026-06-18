@@ -77,7 +77,7 @@ const InvoiceForm = () => {
         invoiceId: result.data.id, // whatever your backend returns
       })).unwrap();
 
-      navigate('/paymentpage', { state: { invoiceId: result.data.invoiceId } }); 
+      navigate('/payments/paymentpage', { state: { invoiceId: result.data.invoiceId } }); 
       // navigate('/paymentpage'); 
        // Clear form only on success
         console.log("Invoice added successfully:", result.data);

@@ -59,9 +59,9 @@ navigate(returnUrl, { replace: true });
   return (
     <Container className="mt-3">
       <Row>
-        <Col md={4}>
+        <Col md={5}>
           <p>Login Form</p>
-          <Form noValidate onSubmit={handleSubmit}>
+          <Form noValidate onSubmit={handleSubmit} className='mt-3 py-3 px-3 rounded shadow justify-content-center' style={{backgroundColor:'#f8f9fa'}}>
             <FormGroup className="mb-3" controlId="emailId">
               <FormControl
                 type="email"
@@ -98,6 +98,11 @@ navigate(returnUrl, { replace: true });
               Login
             </Button>
           </Form>
+          <div className="mt-3 flex gap-2">
+            <a href="/auth/forgot-password">Forgot Password?</a>
+         <br/>
+            <a href="/register">Don't have an account? Register</a>
+          </div>
         </Col>
       </Row>
     </Container>

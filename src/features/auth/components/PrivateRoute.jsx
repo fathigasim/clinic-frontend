@@ -2,20 +2,19 @@ import { useMemo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { selectAuthLoading } from '../authSlice';
+import { selectAuthLoading, selectIsAuthenticated } from '../authSlice';
 import { tokenService } from '../../../services/tokenService';
 
-const EXCLUDED_RETURN_PATHS = ['/login', '/logout', '/auth/logout', '/forbidden'];
+const EXCLUDED_RETURN_PATHS = ['/auth/login', '/logout', '/auth/logout', '/auth/forbidden'];
 
 const PrivateRoute = ({
   children,
   allowedRoles = [],
   requireAllRoles = false,
-  fallbackUrl = '/forbidden',
-  loginUrl = '/login',
+  fallbackUrl = '/auth/forbidden',
+  loginUrl = '/auth/login',
 }) => {
-  const isAuthenticated =
-    tokenService.isTokenExpired(tokenService.getAccessToken()) === false;
+  const isAuthenticated = useSelector(selectIsAuthenticated); // ← from Redux now
   const loading = useSelector(selectAuthLoading);
   const location = useLocation();
 
@@ -35,6 +34,7 @@ const PrivateRoute = ({
     };
   }, [allowedRoles, requireAllRoles, isAuthenticated]);
 
+  // Wait for initializeAuth to complete before making any decision
   if (loading) {
     return (
       <div
@@ -48,7 +48,6 @@ const PrivateRoute = ({
     );
   }
 
-  // Not authenticated → sanitize return URL → redirect to login
   if (!isAuthenticated) {
     const from = EXCLUDED_RETURN_PATHS.some((path) =>
       location.pathname.startsWith(path)
@@ -65,7 +64,6 @@ const PrivateRoute = ({
     );
   }
 
-  // Authenticated but missing required roles → redirect to forbidden
   if (allowedRoles.length > 0 && !hasAccess) {
     console.warn(
       `Access denied. Required roles: ${allowedRoles.join(', ')}, User has: ${userRoles.join(', ')}`

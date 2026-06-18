@@ -9,6 +9,8 @@ import { Spinner } from 'react-bootstrap';
 const stripePromise = loadStripe(import.meta.env.VITE_Publishable_Key); //  public key only on frontend
 
  const CheckoutForm = ({ clientSecret }) => {
+  // import.meta.env.VITE_Success_Url
+  const appUrl=import.meta.env.VITE_API_URL
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -18,11 +20,11 @@ const stripePromise = loadStripe(import.meta.env.VITE_Publishable_Key); //  publ
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Stripe collects and tokenizes card — you never touch card data
+    //  Stripe collects and tokenizes card — you never touch card data
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: 'http://localhost:5173/payment-success',
+        return_url: `${appUrl}/payments/payment-success`,
       },
       redirect: 'if_required'
     });
@@ -35,7 +37,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_Publishable_Key); //  publ
     if (paymentIntent.status === 'succeeded') {
       //  Send only the paymentIntentId to your backend
       await dispatch(confirmPayment({ paymentIntentId: paymentIntent.id }));
-      navigate('/payment-success');
+      navigate('/payments/payment-success');
     }
   };
 

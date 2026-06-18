@@ -71,6 +71,7 @@ api.interceptors.response.use(
 
     // No response — network error, let the component handle it
     if (!error.response) {
+        window.location.replace('/ServerError');
       return Promise.reject(error);
     }
 
@@ -92,12 +93,12 @@ api.interceptors.response.use(
 
     // Don't retry the refresh endpoint itself
     if (originalRequest?.url?.includes('/auth/refresh')) {
-      return redirectTo('/login');
+      return redirectTo('/auth/login');
     }
 
     // Already retried this request — give up
     if (originalRequest._retry) {
-      return redirectTo('/login');
+      return redirectTo('/auth/login');
     }
 
     // Queue concurrent requests while a refresh is in progress
@@ -134,7 +135,7 @@ api.interceptors.response.use(
       return api(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);
-      return redirectTo('/login');
+      return redirectTo('/auth/login');
     } finally {
       isRefreshing = false;
     }

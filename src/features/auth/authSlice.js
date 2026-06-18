@@ -2,14 +2,14 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authApi } from './AuthApi';
 import { tokenService } from '../../services/tokenService';
 
-const extractError = (error) => {
-  const data = error.response?.data;
-  if (!data) return error.message ?? 'Something went wrong';
-  if (Array.isArray(data)) return data;
-  if (data.errors) return data.errors;
-  if (data.message) return data.message;
-  return 'Something went wrong';
-};
+// const extractError = (error) => {
+//   const data = error.response?.data;
+//   if (!data) return error.message ?? 'Something went wrong';
+//   if (Array.isArray(data)) return data;
+//   if (data.errors) return data.errors;
+//   if (data.message) return data.message;
+//   return 'Something went wrong';
+// };
 export const login = createAsyncThunk(
   'auth/login',
   async (loginData, { rejectWithValue }) => {
@@ -18,7 +18,8 @@ export const login = createAsyncThunk(
         tokenService.setTokens(result.accessToken);
       return result;
     } catch (error) {
-       return rejectWithValue(extractError(error));
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
+      //  return rejectWithValue(extractError(error));
      
     }
   }
@@ -32,7 +33,7 @@ export const register = createAsyncThunk(
       // tokenService.setTokens(result.accessToken);
       return result;
     } catch (error) {
-     return rejectWithValue(extractError(error));}}
+     return rejectWithValue(error);}}
 );
 
 export const confirmEmail = createAsyncThunk(
@@ -43,7 +44,7 @@ export const confirmEmail = createAsyncThunk(
         console.log('confirm email Data:', result);
       return result;
     } catch (error) {
-     return rejectWithValue(extractError(error));}}
+     return rejectWithValue(error);}}
 );
 
 export const resetPassword = createAsyncThunk(
@@ -54,7 +55,7 @@ export const resetPassword = createAsyncThunk(
         console.log('reset password Data:', result);
       return result;
     } catch (error) {
-     return rejectWithValue(extractError(error));}}
+     return rejectWithValue(error);}}
 );
 export const refresh = createAsyncThunk(
   'auth/refresh',
@@ -65,7 +66,7 @@ export const refresh = createAsyncThunk(
       console.log('refresh Data:', result);
       return result;
     } catch (error) {
-      return rejectWithValue(extractError(error));
+      return rejectWithValue(error.response?.data?.message || 'Token refresh failed');
     }
   }
 );
@@ -80,7 +81,7 @@ export const forgotPassword = createAsyncThunk(
       return result.data;
     } catch (error) {
       console.error('Error in forgot password:', error);
-      return rejectWithValue(extractError(error));
+      return rejectWithValue(error.response?.data?.message || 'Failed to request password reset');
     }
   }
 );
@@ -92,20 +93,30 @@ export const logout = createAsyncThunk(
       tokenService.clearTokens(); //  move here
     } catch (error) {
       tokenService.clearTokens(); // clear even on error
-      return rejectWithValue(extractError(error));
+      return rejectWithValue(error.response?.data?.message || 'Logout failed');
     }
   }
 );
 const token = tokenService.getValidAccessToken();
 // Initial state
 const initialState = {
-    isAuthenticated: !!token,
-  token:null,
-  loading: false,
+  isAuthenticated: false,  // don't trust the token yet
+  loading: true,           // block PrivateRoute until we verify
+  token: null,
   error: null,
-  
 };
-
+//  authSlice
+export const initializeAuth = createAsyncThunk(
+  'auth/initializeAuth',
+  async (_, { dispatch }) => {
+    const token = tokenService.getValidAccessToken();
+    if (token) {
+      return { accessToken: token }; // already valid, no refresh needed
+    }
+    // expired or missing → try refresh (uses httpOnly cookie)
+    await dispatch(refresh());
+  }
+);
 // Slice
 const authSlice = createSlice({
   name: 'auth',
@@ -117,6 +128,22 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+    .addCase(initializeAuth.pending, (state) => {
+  state.loading = true;
+})
+.addCase(initializeAuth.fulfilled, (state, action) => {
+  // only set if it returned a token directly (valid token path)
+  if (action.payload?.accessToken) {
+    state.isAuthenticated = true;
+    state.token = action.payload.accessToken;
+  }
+  state.loading = false;
+})
+.addCase(initializeAuth.rejected, (state) => {
+  state.isAuthenticated = false;
+  state.token = null;
+  state.loading = false;
+})
       .addCase(register.pending, (state) => {
         state.loading = true;
         state.error = null;

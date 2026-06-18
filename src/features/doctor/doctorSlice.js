@@ -89,41 +89,31 @@ export const addDoctorSchedule = createAsyncThunk(
   async (schedule, { rejectWithValue }) => {
     try {
       const result = await doctorApi.addDoctorScheduleApi(schedule);
-      console.log('Added Doctor Schedule Data:', result);
       return result;
     } catch (error) {
-      // console.error('Error response data:', error.response?.data);
-      //   rejectWithValue(error.response?.data || error.message || "Failed to add patient");
-      //  Handle array of errors
-      const errors = error.response.data;
-if (error.response?.status === 400) {
-  const data = error.response?.data;
-  
-  const errorMessage = 
-    data?.errors?.[""] ?.[0]      // FluentValidation model-level error
-    ?? data?.message               // custom { message } response
-    ?? data?.title                 // fallback to "ValidationError"
-    ?? "Failed to add schedule. Please check your input and try again.";
+          console.log("full error:", error);
+    console.log("status:", error.response?.status);
+    console.log("data:", error.response?.data)
+      const status = error.response?.status;
+      const data = error.response?.data;
 
-  return rejectWithValue({ message: errorMessage });
+      if (status === 400) {
+        // FluentValidation errors: { "": [...], "DoctorId": [...] }
+        // OR general error: { message: "..." }
+        return rejectWithValue(data?.errors ?? data);
+      }
+
+      if (status === 404) {
+        return rejectWithValue({ message: "Resource not found." });
+      }
+if (status === 422) {
+    return rejectWithValue({ message: data?.message }); // business rule errors
 }
-      if (Array.isArray(errors)) {
-        // If it's an array, join into a string or return as-is
-        return rejectWithValue(errors);
+      if (status === 500) {
+        return rejectWithValue({ message: "Server error, please try again later." });
       }
 
-      // If it's an object with errors property
-      if (errors?.errors) {
-        return rejectWithValue(errors.errors);
-      }
-
-      // If it's an object with message
-      if (errors?.message) {
-        return rejectWithValue(errors.message);
-      }
-
-      return rejectWithValue("Failed to add doctor");
-     
+      return rejectWithValue({ message: "Failed to add doctor schedule." });
     }
   }
 );
@@ -131,7 +121,7 @@ if (error.response?.status === 400) {
 const initialState = {
 
   doctors: [],
-  doctorSchedule: [],
+  doctorSchedule:null,
   data: null,
   loading: false,
   error: null,

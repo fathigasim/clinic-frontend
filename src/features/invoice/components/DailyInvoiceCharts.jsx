@@ -25,11 +25,11 @@ export default function DailyInvoiceCharts() {
     <ResponsiveContainer width="100%" height={300} className={"mt-5"}>
       <BarChart data={dailyInvoices} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-        <XAxis dataKey="dailyInvoiceDate" label={{ value: 'Date', position: 'insideBottom', offset: 0 }} />
-        <YAxis />
+        <XAxis dataKey="dailyInvoiceDate" label={{ value: 'Date', position: 'bottom', offset: 0 }} />
+        <YAxis  label={{ value: 'Total', position: 'top-left', offset: 0 }} />
         <Tooltip />
         <Legend />
-        <Bar dataKey="dailyInvoiceDateTotal" fill="#378ADD" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="dailyInvoiceDateTotal" fill='#238765' label={{ value: 'Total', position: 'top', offset: 2, margin: { top: 20 } }} fill="#378ADD" radius={[4, 4, 0, 0]} />
         {/* <Bar dataKey="cost" fill="#73726c" radius={[4, 4, 0, 0]} /> */}
       </BarChart>
 

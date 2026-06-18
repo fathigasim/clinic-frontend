@@ -24,7 +24,7 @@ export default function MonthlyInvoiceCharts() {
 }, [dispatch, status]);
 
   return (
-    <>
+   <>
     {console.log('Checking all invoices loaded',monthlyInvoices)}
     <ResponsiveContainer width="100%" height={300} className={"mt-5"}>
       <BarChart data={monthlyInvoices} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -39,14 +39,17 @@ export default function MonthlyInvoiceCharts() {
 
 
     </ResponsiveContainer>
-    <ResponsiveContainer width="80%" height={300} className={"mt-5"}>
+
+    {/* <ResponsiveContainer width="80%" height={300} className={"mt-5"}>
         <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
           <Line dataKey="revenue" stroke="#378ADD" strokeWidth={2}
             dot={false} activeDot={{ r: 4 }} />
           <Line dataKey="cost" stroke="#1D9E75" strokeWidth={2}
             strokeDasharray="5 4" dot={false} />
         </LineChart>
-      </ResponsiveContainer></>
+      </ResponsiveContainer>
+       */}
+      </>
  
  
   );

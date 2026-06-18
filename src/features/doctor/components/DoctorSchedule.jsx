@@ -3,13 +3,45 @@ import { useDispatch,useSelector } from 'react-redux'
 import { addDoctorSchedule,getAllDoctors,selectAllDoctors } from '../doctorSlice';
 import {Col,Row,Container,Form,FormControl,FormGroup, FormSelect, Button} from 'react-bootstrap'
 import {toast} from 'react-toastify'
+import { useForm } from 'react-hook-form';
+import { useFormServerErrors } from '../../../hooks/useFormServerErrors';
 const DoctorSchedule = () => {
-   const [doctorId,setDoctorId] =useState("");
-  //  const [dayOfWeek,setDayOfWeek] =useState("");
-  const [scheduleDate,setScheduleDate] =useState("");
-   const [startTime,setStartTime] =useState("");
-   const [endTime,setEndTime] =useState("");
-    const [formErrors, setFormErrors] = useState({});
+
+
+
+
+
+const { register, handleSubmit, reset, setError, formState: { errors } } = useForm({
+    defaultValues: {
+        doctorId: "",
+        scheduleDate: "",
+        startTime: "",
+        endTime: ""
+    }
+});
+const handleServerErrors =useFormServerErrors(setError)
+const onSubmit = async (data) => {
+    const payload = {
+        doctorId: data.doctorId  ||null,
+        scheduleDate: data.scheduleDate || null,
+        startTime: data.startTime ? `${data.startTime}:00` : null,
+        endTime: data.endTime ? `${data.endTime}:00` : null
+    };
+    try{
+    const result=  await dispatch(addDoctorSchedule(payload)).unwrap();
+    toast.success(result || 'Doctor schedule added successfully');
+    reset(); // Reset the form after successful submission
+    }
+   catch (error) {
+    console.error('Error adding doctor schedule:', errors);
+handleServerErrors(error);
+}
+}
+        
+    
+    
+  
+
   const doctors=useSelector(selectAllDoctors);
   const dispatch=useDispatch();
 
@@ -17,99 +49,83 @@ const DoctorSchedule = () => {
     dispatch(getAllDoctors())
   },[dispatch])
 
-    const clearFieldError = (field) => {
-    if (formErrors[field]) {
-      setFormErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-const DoctorScheduleForm = async()=>{
-try{
-  console.log("Checking both start time and end time:", startTime, endTime)
- var result=  await dispatch(addDoctorSchedule({doctorId,scheduleDate,startTime: startTime.length === 5 ? `${startTime}:00` : startTime,endTime: endTime.length === 5 ? `${endTime}:00` : endTime})).unwrap();
-    console.log("schedule component result data =>",result)
-    // if(!result.isSuccess){
-    
-    //     toast.error(result.errorMessage || "Failed to add schedule.");
-    //     return;
-    // }
-     setScheduleDate("");
-     setDoctorId("");
-     setStartTime("");
-     setEndTime("");
-    toast.success(result.data || "Schedule added successfully.");
-    }
-    catch(err){
-
-        console.log('Check errors in the catch block:',err)
-        toast.error(err.message||"Failed to add schedule.");
-    }
-}
   return (
     <>
     <Container>
-        <h2>Doctor Schedule</h2>
+      {errors.root && (
+    <div className="alert alert-danger mt-2">
+        {errors.root.message}
+    </div>
+)}
+        <h2 className='mt-3 text-center'>Doctor Schedule</h2>
     
     <Row>
-        <Col md={6}>
-      <Form noValidate >
-             <FormGroup className='mb-3'>
-                <FormSelect  value={doctorId}  onChange={(e)=>{setDoctorId(e.target.value)
-                    clearFieldError("doctorId")
-                }} placeholder='Doctor'>
-                    <option value="">---Select Doctor---</option>
-                    {doctors.map((doctor)=>(
-                        <option key={doctor.doctorId} value={doctor.doctorId}>{doctor.firstName+' '+doctor.lastName+' '+doctor.specialization}</option>
-                    ))}
-                </FormSelect>
-             </FormGroup>
-            {/* <FormGroup className='mb-3'>
-                <FormSelect value={dayOfWeek} onChange={(e)=>{setDayOfWeek(parseInt(e.target.value))
 
-                     clearFieldError("dayOfWeek")
-                }} placeholder='Day of Week'>
-                      <option value="">---Select Day---</option>
-                      <option value={0}>Sunday</option>
-                      <option value={1}>Monday</option>
-                      <option value={2}>Tuesday</option>
-                      <option value={3}>Wednesday</option>
-                      <option value={4}>Thursday</option>
-                      <option value={5}>Friday</option>
-                      <option value={6}>Saturday</option>
-                </FormSelect>
-            </FormGroup> */}
-              <FormGroup className='mb-3'>
-                <FormControl type='date' value={scheduleDate}  onChange={(e)=>{setScheduleDate(e.target.value)
+ <FormGroup className='mb-3'>
+    <FormSelect 
+        {...register("doctorId", { 
+            required: "Doctor selection is required.",
+            validate: value => value !== "" || "Doctor selection is required."
+        })}  
+        className={errors.doctorId ? "form-select is-invalid" : "form-select"}
+    >
+        <option value="">---Select Doctor---</option>
+        {doctors.map((doctor) => (
+            <option key={doctor.doctorId} value={doctor.doctorId}>
+                {doctor.firstName + ' ' + doctor.lastName + ' ' + doctor.specialization}
+            </option>
+        ))}
+    </FormSelect>
+    {errors.doctorId && (
+        <div className="invalid-feedback d-block">
+            {errors.doctorId.message}
+        </div>
+    )}
+</FormGroup>
+      <FormGroup className='mb-3'>
+    <FormControl
+        type='date'
+        {...register("scheduleDate", { required: "Schedule date is required." })}
+      invalid={!!errors.scheduleDate}
+    />
+    {errors.scheduleDate && <p className="text-danger">{errors.scheduleDate.message}</p>}
+    <FormControl.Feedback type="invalid">
+                    {errors.scheduleDate && errors.scheduleDate.message}
+                </FormControl.Feedback>
+</FormGroup>
 
-                   clearFieldError("scheduleDate") 
-                }}  >
+<FormGroup className='mb-3'>
+    <FormControl
+        type='time'
+        {...register("startTime", { required: "Start time is required." })}
+        invalid={!!errors.startTime}
+    />
+    {errors.startTime && <p className="text-danger">{errors.startTime.message}</p>}
+    <FormControl.Feedback type="invalid">
+                    {errors.startTime && errors.startTime.message}
+                </FormControl.Feedback>
+</FormGroup>
 
-                </FormControl>
-            </FormGroup>
-            <FormGroup className='mb-3'>
-                <FormControl type='time' value={startTime}  onChange={(e)=>{setStartTime(e.target.value)
+<FormGroup className='mb-3'>
+    <FormControl
+        type='time'
+        {...register("endTime", {
+            required: "End time is required.",
+            validate: (val, formValues) =>
+                val > formValues.startTime || "End time must be after start time."
+        })}
+        invalid={!!errors.endTime}
+    />
+    {errors.endTime && <p className="text-danger">{errors.endTime.message}</p>}
+    <FormControl.Feedback type="invalid">
+                    {errors.endTime && errors.endTime.message}
+                </FormControl.Feedback>
+</FormGroup>
 
-                   clearFieldError("startTime") 
-                }}  >
-
-                </FormControl>
-            </FormGroup>
-
-             <FormGroup className='mb-3'>
-                <FormControl type='time' value={endTime} onChange={(e)=>{setEndTime(e.target.value)
-
-                      clearFieldError("endTime") 
-                }}  >
-
-                </FormControl>
-            </FormGroup>
-
-            <Button onClick={DoctorScheduleForm}>Add Schedule</Button>
-      </Form>
-      </Col>
+<Button type='button' onClick={handleSubmit(onSubmit)}>Save Schedule</Button>
       </Row>
       </Container>
     </>
   )
 }
-
 export default DoctorSchedule
