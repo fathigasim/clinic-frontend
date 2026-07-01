@@ -29,19 +29,25 @@ import Patients from './features/patient/components/Patients'
 import NotFound from './components/NotFound';
 import InvoiceByDateReport from './features/invoice/components/InvoiceByDateReport'
 import DoctorsSchedule from './features/doctor/components/DoctorsSchedule'
+import MfaVerify from './features/auth/components/MfaVerify'
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from './features/auth/authSlice';
 import { tokenService } from './services/tokenService';
 import { initializeAuth } from './features/auth/authSlice';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useMemo } from 'react'
 function App() {
-    const token = tokenService.getAccessToken();
+  //   const token = tokenService.getAccessToken();
 
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const role=tokenService.getUserRoles(token);
+  // const isAuthenticated = useSelector(selectIsAuthenticated);
+  // const role=tokenService.getUserRoles(token);
     const dispatch = useDispatch();
-
+const isAuthenticated = useSelector(selectIsAuthenticated);
+const role = useMemo(() => {
+  const token = tokenService.getAccessToken();
+  return tokenService.getUserRoles(token);
+}, [isAuthenticated]); // recompute only when auth actually changes
   useEffect(() => {
     dispatch(initializeAuth());
   }, []);
@@ -63,6 +69,7 @@ function App() {
        <Route path="/doctors/doctor-form" element={<DoctorForm/>} />
        <Route path="/auth/register" element={<RegisterForm/>} />
        <Route path="/auth/login" element={<LoginForm/>} />
+       <Route path="/auth/mfa-verify" element={<MfaVerify/>} />
        <Route path="/auth/confirm-email" element={<ConfirmEmail/>} />
        <Route path="/auth/forgot-password" element={<ForegotPassword/>} />
        <Route path="/auth/reset-password" element={<ResetPassword/>} />

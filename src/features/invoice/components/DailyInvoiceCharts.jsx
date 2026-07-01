@@ -2,7 +2,7 @@ import {selectDailyInvoices,getDailyInvoices,selectDailyInvoicesStatus} from '..
 import { useDispatch,useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-         CartesianGrid, Tooltip, Legend,LineChart,Line } from 'recharts';
+         CartesianGrid, Tooltip, Legend,LabelList,LineChart,Line } from 'recharts';
 
 
 
@@ -29,20 +29,19 @@ export default function DailyInvoiceCharts() {
         <YAxis  label={{ value: 'Total', position: 'top-left', offset: 0 }} />
         <Tooltip />
         <Legend />
-        <Bar dataKey="dailyInvoiceDateTotal" fill='#238765' label={{ value: 'Total', position: 'top', offset: 2, margin: { top: 20 } }} fill="#378ADD" radius={[4, 4, 0, 0]} />
-        {/* <Bar dataKey="cost" fill="#73726c" radius={[4, 4, 0, 0]} /> */}
+        {/* <Bar dataKey="dailyInvoiceDateTotal" fill='#238765' label={{ value: 'Total', position: 'top', offset: 2, margin: { top: 20 } }} fill="#378ADD" radius={[4, 4, 0, 0]} /> */}
+        <Bar dataKey="dailyInvoiceDateTotal" name="Total" fill="#378ADD" radius={[4, 4, 0, 0]}>
+  <LabelList
+    dataKey="dailyInvoiceDateTotal"
+    position="top"
+    formatter={(value) => `$${value.toLocaleString()}`}
+  />
+</Bar>
       </BarChart>
 
 
     </ResponsiveContainer>
-    {/* <ResponsiveContainer width="80%" height={300} className={"mt-5"}>
-        <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-          <Line dataKey="revenue" stroke="#378ADD" strokeWidth={2}
-            dot={false} activeDot={{ r: 4 }} />
-          <Line dataKey="cost" stroke="#1D9E75" strokeWidth={2}
-            strokeDasharray="5 4" dot={false} />
-        </LineChart>
-      </ResponsiveContainer> */}
+  
       
       </>
  

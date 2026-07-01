@@ -29,8 +29,8 @@ const processQueue = (error, token = null) => {
 const redirectTo = (path) => {
   isRedirecting = true;
   tokenService.clearTokens();
-  window.location.replace(path);
-  return new Promise(() => {});
+  // window.location.replace(path);
+  return new Promise(() => {}); // fine to leave unresolved — we're navigating away
 };
 
 // ─── Request Interceptor ─────────────────────────────────────────────────────
@@ -99,8 +99,13 @@ api.interceptors.response.use(
     // Already retried this request — give up
     if (originalRequest._retry) {
       return redirectTo('/auth/login');
+    
+       
     }
-
+    //  console.log('401 on:', originalRequest.url, error.response.data);
+     console.log('401 DEBUG on:', originalRequest.url, JSON.stringify(error.response.data));
+ //    debugger;
+// return Promise.reject(error);
     // Queue concurrent requests while a refresh is in progress
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -119,8 +124,10 @@ api.interceptors.response.use(
     try {
       // api.post sends the current access token via the request interceptor
       // and sends the refresh_token cookie via withCredentials
-      const refreshResponse = await api.post('/auth/refresh');
-
+      // const refreshResponse = await api.post('/auth/refresh');
+  const refreshResponse = await axios.post(`${apiUrl}/auth/refresh`, {}, {
+    withCredentials: true // sending the HTTP-only cookie safely
+  });
       const newAccessToken = refreshResponse.data?.accessToken;
       if (!newAccessToken) {
         throw new Error('No access token in refresh response');

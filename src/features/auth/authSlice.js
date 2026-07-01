@@ -15,12 +15,12 @@ export const login = createAsyncThunk(
   async (loginData, { rejectWithValue }) => {
     try {
       const result = await authApi.loginApi(loginData);
+      if (result.accessToken) {
         tokenService.setTokens(result.accessToken);
+      }
       return result;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
-      //  return rejectWithValue(extractError(error));
-     
     }
   }
 );
@@ -85,6 +85,75 @@ export const forgotPassword = createAsyncThunk(
     }
   }
 );
+export const setupMfa = createAsyncThunk(
+  'auth/mfa/setup',
+  async ( _,{ rejectWithValue }) => {
+    try {
+      const result = await authApi.setupMfaApi();
+     
+      console.log('setup mfa data:', result.data);
+      return result;
+    } catch (error) {
+   //   console.error('Error in forgot password:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to request password reset');
+    }
+  }
+);
+export const enableMfa = createAsyncThunk(
+  'auth/mfa/enable',
+  async (enableCode, { rejectWithValue }) => {
+    try {
+      const result = await authApi.enableMfaApi(enableCode);
+     
+      console.log('enable mfa data:', result);
+      return result;
+    } catch (error) {
+   //   console.error('Error in forgot password:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to request password reset');
+    }
+  }
+);
+export const disableMfa = createAsyncThunk(
+  'auth/mfa/disable',
+  async (password, { rejectWithValue }) => {
+    try {
+     // const result =
+       await authApi.disableMfaApi(password);
+     
+   //   console.log('forgot password data:', result.data);
+  //    return result;
+    } catch (error) {
+   //   console.error('Error in forgot password:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to request password reset');
+    }
+  }
+);
+export const  statusMfa = createAsyncThunk(
+  'auth/mfa/status',
+  async (_, { rejectWithValue }) => {
+    try {
+      const result = await authApi.statusMfaApi();
+     
+      console.log('mfa stauts data:', result.data);
+      return result.data;
+    } catch (error) {
+   //   console.error('Error in forgot password:', error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to request password reset');
+    }
+  }
+);
+export const verifyMfa = createAsyncThunk(
+  'auth/login/mfa',
+  async ({ mfaToken, code }, { rejectWithValue }) => {
+    try {
+      const result = await authApi.verifyMfaApi({ mfaToken, code });
+      tokenService.setTokens(result.accessToken);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Invalid code');
+    }
+  }
+);
 export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
@@ -102,8 +171,12 @@ const token = tokenService.getValidAccessToken();
 const initialState = {
   isAuthenticated: false,  // don't trust the token yet
   loading: true,           // block PrivateRoute until we verify
+   mfaLoading: false,     //  new — for setup/enable/disable/status
   token: null,
+  
   error: null,
+  sharedKey:"",
+  authenticatorUri:""
 };
 //  authSlice
 export const initializeAuth = createAsyncThunk(
@@ -194,8 +267,11 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       }).addCase(login.fulfilled, (state, action) => {
-  state.token = action.payload.accessToken;
-  state.isAuthenticated = true; //  add this
+  if (action.payload.accessToken) {
+    state.token = action.payload.accessToken;
+    state.isAuthenticated = true;
+  }
+  // if mfaRequired: true, leave isAuthenticated as-is (false)
   state.loading = false;
   state.error = null;
 }).addCase(login.rejected, (state,action) => {
@@ -218,7 +294,21 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       }) 
-
+  .addCase(verifyMfa.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(verifyMfa.fulfilled, (state, action) => {
+  if (action.payload.accessToken) {
+    state.token = action.payload.accessToken;
+    state.isAuthenticated = true;
+  }
+  // if mfaRequired: true, leave isAuthenticated as-is (false)
+  state.loading = false;
+  state.error = null;
+}).addCase(verifyMfa.rejected, (state,action) => {
+        state.loading = false;
+        state.error = action.payload;
+      }) 
       //logout
       
        .addCase(logout.pending, (state) => {
@@ -233,7 +323,63 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = null;
       }) 
+      //enable mfa
+         .addCase(enableMfa.pending, (state) => {
+        state.mfaLoading = true;
+        state.error = null;
+      }).addCase(enableMfa.fulfilled, (state) => {
+       // state.isAuthenticated = false;
+     //   state.token = null; // ✅ add this
+         state.mfaLoading = false;
+        state.error = null;
+        }).addCase(enableMfa.rejected, (state) => {
+        state.mfaLoading = false;
+        state.error = null;
+      }) 
+      //disable mfa
+       .addCase(disableMfa.pending, (state) => {
+        state.mfaLoading = true;
+        state.error = null;
+      }).addCase(disableMfa.fulfilled, (state) => {
+       // state.isAuthenticated = false;
+     //   state.token = null; // ✅ add this
+         state.mfaLoading = false;
+        state.error = null;
+        }).addCase(disableMfa.rejected, (state) => {
+        state.mfaLoading = false;
+        state.error = null;
+      }) 
+       //setup mfa
+       .addCase(setupMfa.pending, (state) => {
+        state.mfaLoading = true;
+        state.error = null;
+      }).addCase(setupMfa.fulfilled, (state,action) => {
+       // state.isAuthenticated = false;
+     //   state.token = null; // ✅ add this
+       state.sharedKey=action.payload.sharedKey;
+       state.authenticatorUri=action.payload.authenticatorUri;
+         state.mfaLoading = false;
+        state.error = null;
+        }).addCase(setupMfa.rejected, (state) => {
+        state.mfaLoading = false;
+        state.error = null;
+      }) 
+       //status mfa
+       .addCase(statusMfa.pending, (state) => {
+        state.mfaLoading = true;
+        state.error = null;
+      }).addCase(statusMfa.fulfilled, (state) => {
+       // state.isAuthenticated = false;
+     //   state.token = null; // ✅ add this
+         state.mfaLoading = false;
+        state.error = null;
+        }).addCase(statusMfa.rejected, (state) => {
+        state.mfaLoading = false;
+        state.error = null;
+      }) 
   },
+  //setup mfa
+  
 });
 export const { 
   clearError,
@@ -241,9 +387,10 @@ export const {
 
 //  Selectors
 export const selectAuthLoading = (state) => state.auth.loading;
-
+export const selectMfaLoading = (state) => state.auth.mfaLoading;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectAuthError = (state) => state.auth.error;
-
+export const selectSharedKey=(state)=>state.auth.sharedKey;
+export const selectAutheticationUri=(state)=>state.auth.authenticatorUri;
 
 export default authSlice.reducer;

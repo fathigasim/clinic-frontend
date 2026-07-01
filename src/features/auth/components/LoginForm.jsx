@@ -29,33 +29,56 @@ const LoginForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
 
-    // Client-side validation
-    const errors = {};
-    if (!email) errors.email = 'Email is required';
-    if (!password) errors.password = 'Password is required';
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
+//     // Client-side validation
+//     const errors = {};
+//     if (!email) errors.email = 'Email is required';
+//     if (!password) errors.password = 'Password is required';
+//     if (Object.keys(errors).length > 0) {
+//       setFormErrors(errors);
+//       return;
+//     }
 
-    setFormErrors({});
+//     setFormErrors({});
 
-    try {
-      await dispatch(login({ email, password })).unwrap();
+//     try {
+//       await dispatch(login({ email, password })).unwrap();
 
-// then after login:
-navigate(returnUrl, { replace: true });
+// // then after login:
+// navigate(returnUrl, { replace: true });
  
-    } catch (error) {
-      console.error('Login error:', error);
-      // Only mark password invalid — don't reveal which field is wrong (security)
-      setFormErrors({ password: 'Invalid email or password' });
-    }
-  };
+//     } catch (error) {
+//       console.error('Login error:', error);
+//       // Only mark password invalid — don't reveal which field is wrong (security)
+//       setFormErrors({ password: 'Invalid email or password' });
+//     }
+//   };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const errors = {};
+  if (!email) errors.email = 'Email is required';
+  if (!password) errors.password = 'Password is required';
+  if (Object.keys(errors).length > 0) {
+    setFormErrors(errors);
+    return;
+  }
+  setFormErrors({});
 
+  try {
+    const result = await dispatch(login({ email, password })).unwrap();
+
+    if (result.mfaRequired) {
+      navigate('/auth/mfa-verify', { state: { mfaToken: result.mfaToken, from: returnUrl } });
+    } else {
+      navigate(returnUrl, { replace: true });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    setFormErrors({ password: 'Invalid email or password' });
+  }
+};
   return (
     <Container className="mt-3">
       <Row>

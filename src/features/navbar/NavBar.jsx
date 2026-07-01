@@ -3,7 +3,7 @@ import { logout ,selectIsAuthenticated} from '../auth/authSlice';
 import { useDispatch,useSelector } from 'react-redux';
 import { tokenService } from '../../services/tokenService';
 import { Link, useNavigate } from 'react-router-dom';
-
+import NavToggleSwitch from '../navbar/NavToggleSwitch'
 const NavBar = () => {
   const token = tokenService.getAccessToken();
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -67,6 +67,7 @@ const NavBar = () => {
                 >
                   Logout
                 </Button>
+                {isAuthenticated && <NavToggleSwitch />}
                 </>
               )}
             </div>
