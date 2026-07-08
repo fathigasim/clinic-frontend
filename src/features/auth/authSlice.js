@@ -183,7 +183,7 @@ export const logout = createAsyncThunk(
     }
   }
 );
-const token = tokenService.getValidAccessToken();
+//const token = tokenService.getValidAccessToken();
 // Initial state
 const initialState = {
   isAuthenticated: false,  // don't trust the token yet

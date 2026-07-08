@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { register } from '../authSlice';
 import {
@@ -22,7 +22,7 @@ const RegisterForm = () => {
   const navigate = useNavigate();
 //   const location = useLocation();
 
-  const returnUrl = '/login';//location.state?.from || 
+  //const returnUrl = '/login';//location.state?.from || 
 
   const clearFieldError = (field) => {
     if (formErrors[field]) {
