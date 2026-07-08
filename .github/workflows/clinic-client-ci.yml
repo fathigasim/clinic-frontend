@@ -1,8 +1,17 @@
-build-frontend:
+name: Build Clinic Frontend
+
+on:
+  push:
+    branches: [ main ]  # Triggers the workflow whenever you push to main
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-frontend:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./clinic-front   # adjust to your folder name
+        working-directory: ./clinic-front   # Every 'run:' command happens inside here
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
@@ -17,13 +26,13 @@ build-frontend:
     - name: Install dependencies
       run: npm ci
 
-    - name: Lint (optional but recommended)
+    - name: Lint
       run: npm run lint --if-present
 
     - name: Build
       run: npm run build
       env:
-        VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}   # set per-environment via repo/environment variables
+        VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
