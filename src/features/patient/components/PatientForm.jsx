@@ -1,9 +1,9 @@
 
-import { useState ,useEffect} from 'react'
+import { useState } from 'react'
 import { Form,Button, FormControl,Container,FormGroup, FormSelect } from 'react-bootstrap'
 import {Col,Row} from 'react-bootstrap'
 import { useDispatch,useSelector } from 'react-redux'
-import {addPatient,selectPatientLoading,selectPatientMessage,clearError,clearMessge} from '../patientSlice'
+import {addPatient,selectPatientLoading,clearError,clearMessge} from '../patientSlice'
 import { toast } from "react-toastify";
 
 const PatientForm = () => {

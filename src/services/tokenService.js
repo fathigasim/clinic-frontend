@@ -58,7 +58,7 @@ export const tokenService = {
   if (!token) return null;
   try {
     const decoded = jwtDecode(token);
-    return decoded.sub || null; // ✅ backend uses JwtRegisteredClaimNames.Sub
+    return decoded.sub || null; //  backend uses JwtRegisteredClaimNames.Sub
   } catch {
     return null;
   }
@@ -68,7 +68,7 @@ getEmailFromToken: (token) => {
   if (!token) return null;
   try {
     const decoded = jwtDecode(token);
-    return decoded.email || null; // ✅ backend uses JwtRegisteredClaimNames.Email
+    return decoded.email || null; //  backend uses JwtRegisteredClaimNames.Email
   } catch {
     return null;
   }

@@ -128,7 +128,7 @@ const initialState = {
   availableSlots: [],
 };
 
-// ✅ Slice
+// Slice
 const doctorSlice = createSlice({
   name: 'doctor',
   initialState,

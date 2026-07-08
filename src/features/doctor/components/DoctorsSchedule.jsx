@@ -1,8 +1,8 @@
  
-import React,{useEffect} from 'react';
+import {useEffect} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDoctorsSchedule, selectDoctorSchedule } from '../doctorSlice';
-import {Container,Row,Col,Table} from 'react-bootstrap';
+import {Container} from 'react-bootstrap';
  const DoctorsSchedule = () => {
 const dispatch = useDispatch();
 const doctorSchedule = useSelector(selectDoctorSchedule);

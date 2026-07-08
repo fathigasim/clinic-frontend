@@ -200,6 +200,7 @@ useEffect(() => {
       setSetupData(result); // { sharedKey, authenticatorUri }
       setShowSetupModal(true);
     } catch (err) {
+      console.log(err)
       setError('Could not start MFA setup.');
     }
   };
@@ -212,6 +213,7 @@ useEffect(() => {
      // setShowSetupModal(false);
       setEnableCode('');
     } catch (err) {
+        console.log(err)
       setError('Invalid code. Try again.');
     }
   };
@@ -225,6 +227,7 @@ useEffect(() => {
       setShowDisableModal(false);
       setPassword('');
     } catch (err) {
+        console.log(err)
       setError('Invalid password.');
     }
   };

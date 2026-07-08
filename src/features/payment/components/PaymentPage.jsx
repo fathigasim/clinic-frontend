@@ -8,7 +8,9 @@ import { Spinner } from 'react-bootstrap';
 
 const stripePromise = loadStripe(import.meta.env.VITE_Publishable_Key); //  public key only on frontend
 
- const CheckoutForm = ({ clientSecret }) => {
+ const CheckoutForm = () => {
+  //{ clientSecret }
+  //console.log(`client secret${clientSecret}`)
   // import.meta.env.VITE_Success_Url
   const appUrl=import.meta.env.VITE_API_URL
   const dispatch = useDispatch();

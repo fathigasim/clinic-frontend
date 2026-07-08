@@ -37,7 +37,7 @@ const PaymentForm = () => {
         try{
       const result=     await dispatch(getInvoiceByInvoiceNo(invoiceNo)).unwrap();
       setPayment(prev => ({ ...prev, amount: result.data.totalAmount }));
-      console.log('result of component total amoun=>',result)
+      console.log(`result of component total amoun=>${result} and payemnt${payment}`,result)
         }
         catch(error){
             console.log(error);
@@ -163,7 +163,7 @@ const PaymentForm = () => {
                                 readOnly
                                 type="number"
                                 {...register('amount', { required: 'Please enter the amount.' })}
-                                value={invoice?.totalAmount ?? ''}//{payment.amount ?? ''} // ✅ fix
+                                value={invoice?.totalAmount ?? ''}//{payment.amount ?? ''} // 
                               
                                 isInvalid={!!PaymentErrors.amount}
                             />
@@ -181,7 +181,7 @@ const PaymentForm = () => {
                                 isInvalid={!!PaymentErrors.paymentMethod}
                             >
                                 <option value=''>---Select Payment Method---</option>
-                                <option value='0'>Cash</option> {/* ✅ string values */}
+                                <option value='0'>Cash</option> {/* string values */}
                                 <option value='1'>Card</option>
                             </Form.Select>
                             <Form.Control.Feedback type="invalid">

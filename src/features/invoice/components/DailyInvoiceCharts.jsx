@@ -2,7 +2,7 @@ import {selectDailyInvoices,getDailyInvoices,selectDailyInvoicesStatus} from '..
 import { useDispatch,useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-         CartesianGrid, Tooltip, Legend,LabelList,LineChart,Line } from 'recharts';
+         CartesianGrid, Tooltip, Legend,LabelList} from 'recharts';
 
 
 

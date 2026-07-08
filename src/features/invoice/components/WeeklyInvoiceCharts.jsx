@@ -2,7 +2,7 @@ import {selectWeeklyInvoices,getWeeklyInvoices,selectWeeklyInvoicesStatus} from 
 import { useDispatch,useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-         CartesianGrid, Tooltip, Legend,LineChart,Line } from 'recharts';
+         CartesianGrid, Tooltip, Legend } from 'recharts';
 
 // const data = [
 //   { month: 'Jan', revenue: 4200, cost: 2800 },
