@@ -26,13 +26,31 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// const redirectTo = (path) => {
+//   isRedirecting = true;
+//   tokenService.clearTokens();
+//   // window.location.replace(path);
+//   return new Promise(() => {}); // fine to leave unresolved — we're navigating away
+// };
+// const redirectTo = (path) => {
+//   if (!isRedirecting) {
+//     isRedirecting = true;
+//     tokenService.clearTokens();
+//     window.location.replace(path);
+//   }
+//   return Promise.reject(new Error('Session expired, redirecting to login'));
+// };
 const redirectTo = (path) => {
-  isRedirecting = true;
-  tokenService.clearTokens();
-  // window.location.replace(path);
-  return new Promise(() => {}); // fine to leave unresolved — we're navigating away
+  if (window.location.pathname === path) {
+    return Promise.reject(new Error('Already on login page'));
+  }
+  if (!isRedirecting) {
+    isRedirecting = true;
+    tokenService.clearTokens();
+    window.location.replace(path);
+  }
+  return Promise.reject(new Error('Session expired, redirecting to login'));
 };
-
 // ─── Request Interceptor ─────────────────────────────────────────────────────
 
 api.interceptors.request.use(
@@ -61,13 +79,21 @@ api.interceptors.response.use(
       return new Promise(() => {});
     }
 
-    // Skip interceptor for logout requests
-    if (
-      originalRequest?.url?.includes('/auth/logout') ||
-      originalRequest?.url?.includes('/logout')
-    ) {
-      return Promise.reject(error);
-    }
+    // Skip interceptor for login & logout requests
+    // if (
+    //   originalRequest?.url?.includes('/auth/login') ||
+    //   originalRequest?.url?.includes('/login') ||
+    //   originalRequest?.url?.includes('/auth/logout') ||
+    //   originalRequest?.url?.includes('/logout')
+    // ) {
+    //   return Promise.reject(error);
+    // }
+
+    const skipUrls = ['/auth/login', '/login', '/auth/logout', '/logout'];
+const isAuthUrl = skipUrls.some(u => originalRequest?.url?.toLowerCase().includes(u));
+if (isAuthUrl) {
+  return Promise.reject(error);
+}
 
     // No response — network error, let the component handle it
     if (!error.response) {
@@ -98,6 +124,7 @@ api.interceptors.response.use(
 
     // Already retried this request — give up
     if (originalRequest._retry) {
+      console.log('originalRequest.url:', originalRequest?.url);
       return redirectTo('/auth/login');
     
        

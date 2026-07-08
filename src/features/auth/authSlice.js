@@ -10,6 +10,22 @@ import { tokenService } from '../../services/tokenService';
 //   if (data.message) return data.message;
 //   return 'Something went wrong';
 // };
+// export const login = createAsyncThunk(
+//   'auth/login',
+//   async (loginData, { rejectWithValue }) => {
+//     try {
+//       const result = await authApi.loginApi(loginData);
+//       if (result.accessToken) {
+//         tokenService.setTokens(result.accessToken);
+//       }
+//       return result;
+//     } catch (error) {
+//       console.log('Login thunk error response',error)
+//       if(error.response?.status===401)
+//       return rejectWithValue(error.response?.data?.message || 'Login failed');
+//     }
+//   }
+// );
 export const login = createAsyncThunk(
   'auth/login',
   async (loginData, { rejectWithValue }) => {
@@ -20,7 +36,8 @@ export const login = createAsyncThunk(
       }
       return result;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+      const message = error.response?.data?.message || 'Login failed';
+      return rejectWithValue(message);
     }
   }
 );
@@ -134,8 +151,8 @@ export const  statusMfa = createAsyncThunk(
     try {
       const result = await authApi.statusMfaApi();
      
-      console.log('mfa stauts data:', result.data);
-      return result.data;
+      console.log('mfa stauts data:', result);
+      return result;
     } catch (error) {
    //   console.error('Error in forgot password:', error);
       return rejectWithValue(error.response?.data?.message || 'Failed to request password reset');

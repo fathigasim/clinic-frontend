@@ -48,9 +48,23 @@ const role = useMemo(() => {
   const token = tokenService.getAccessToken();
   return tokenService.getUserRoles(token);
 }, [isAuthenticated]); // recompute only when auth actually changes
-  useEffect(() => {
+  // useEffect(() => {
+  //   dispatch(initializeAuth());
+  // }, []);
+  const PUBLIC_ROUTES = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/mfa-verify',
+  '/auth/confirm-email',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+];
+
+useEffect(() => {
+  if (!PUBLIC_ROUTES.includes(window.location.pathname)) {
     dispatch(initializeAuth());
-  }, []);
+  }
+}, []);
   return (
     <>
      <BrowserRouter>
@@ -93,7 +107,7 @@ const role = useMemo(() => {
        
        --private routes --
        <Route path="/patients/patient-form" element={
-        <PrivateRoute allowedRoles={['Admin']} requireAllRoles={false} fallbackUrl="/forbidden" loginUrl="/login">
+        <PrivateRoute allowedRoles={['Admin']} requireAllRoles={false} fallbackUrl="/auth/forbidden" loginUrl="/login">
           <PatientForm/>
         </PrivateRoute>
        
