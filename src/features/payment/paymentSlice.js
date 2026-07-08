@@ -1,5 +1,5 @@
 import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
-import { paymentApi } from "./PaymentApi";
+import { paymentApi } from "./paymentApi";
 const initialState={
     message:null,
     error:null,
