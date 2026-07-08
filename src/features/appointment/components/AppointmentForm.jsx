@@ -2,7 +2,7 @@ import { useEffect,useState } from 'react'
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
-import { addAppointment, getDoctorShiftToday, selectTodaysAvailableDoctors } from '../appointmentSlice';
+import { addAppointment, getDoctorShiftToday, selectTodaysAvailableDoctors } from '../AppointmentSlice';
 import { getTodaysPatients, selectTodaysPatients, selectPatientMessage } from '../../patient/patientSlice'
 import { getDoctorsAvailableSlots, selectAvailableSlots } from '../../doctor/doctorSlice';
 import { toast } from 'react-toastify';
