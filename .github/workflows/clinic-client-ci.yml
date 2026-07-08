@@ -2,16 +2,14 @@ name: Build Clinic Frontend
 
 on:
   push:
-    branches: [ main ]  # Triggers the workflow whenever you push to main
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
   build-frontend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./clinic-front   # Every 'run:' command happens inside here
+    # Removed the global working-directory default since files are at the root
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
@@ -21,7 +19,8 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: ./clinic-front/package-lock.json
+        # Fixed: Changed to look directly at the repository root
+        cache-dependency-path: ./package-lock.json
 
     - name: Install dependencies
       run: npm ci
@@ -38,4 +37,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: clinic-client-dist
-        path: ./clinic-front/dist
+        # Fixed: Vite will output to a 'dist' folder at the root level
+        path: ./dist
