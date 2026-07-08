@@ -1,0 +1,32 @@
+build-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./clinic-front   # adjust to your folder name
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: clinic-front/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Lint (optional but recommended)
+      run: npm run lint --if-present
+
+    - name: Build
+      run: npm run build
+      env:
+        VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}   # set per-environment via repo/environment variables
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: clinic-client-dist
+        path: ./ClinicProjectClient/dist
