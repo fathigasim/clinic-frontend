@@ -4,11 +4,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { addAppointment, getDoctorShiftToday, selectTodaysAvailableDoctors } from '../AppointmentSlice';
 import { getTodaysPatients, selectTodaysPatients, selectPatientMessage } from '../../patient/patientSlice'
-import { getDoctorsAvailableSlots, selectAvailableSlots } from '../../doctor/doctorSlice';
+import { 
+  getDoctorsAvailableSlots, 
+  getDoctorsAvailableSlotsByDate, 
+  selectAvailableSlots,
+  getScheduledDoctors, 
+  selectScheduledDoctors 
+} from '../../doctor/doctorSlice';
 import { toast } from 'react-toastify';
 
 const AppointmentForm = () => {
-  const doctorsShift = useSelector(selectTodaysAvailableDoctors);
+  const doctorsShift = useSelector(selectScheduledDoctors);
   const todayPatients = useSelector(selectTodaysPatients);
   const patientsMessage = useSelector(selectPatientMessage);
   const doctorSlots = useSelector(selectAvailableSlots);
@@ -34,7 +40,7 @@ const AppointmentForm = () => {
 
   useEffect(() => {
     dispatch(getTodaysPatients());
-    dispatch(getDoctorShiftToday());
+    dispatch(getScheduledDoctors());
   }, [dispatch]);
 
   // Form 1 submit
@@ -46,13 +52,22 @@ const AppointmentForm = () => {
     setSlotsChecked(true);
   };
 
+   const onCheckSlotsByDate = async (data) => {
+    await dispatch(getDoctorsAvailableSlotsByDate({
+      doctorId: data.docId,
+      date: data.date,
+    })).unwrap();
+    setSlotsChecked(true);
+  };
+
   // Form 2 submit
   const onBookAppointment = async (data) => {
     try {
       const result = await dispatch(addAppointment({
         patientId: data.patientId,
         doctorId: data.doctorId,
-        dayOfWeek: Number(data.dayOfWeek),
+        // dayOfWeek: Number(data.dayOfWeek),
+        AppointmentDate:data.appointmentDate,
         startTime: data.startTime.length === 5 ? `${data.startTime}:00` : data.startTime,
         notes: data.notes,
       })).unwrap();
@@ -68,7 +83,8 @@ const AppointmentForm = () => {
       // Map server errors back to fields
       if (err?.DoctorId)   setApptError('doctorId',  { message: err.DoctorId[0] });
       if (err?.PatientId)  setApptError('patientId', { message: err.PatientId[0] });
-      if (err?.DayOfWeek)  setApptError('dayOfWeek', { message: err.DayOfWeek[0] });
+      // if (err?.DayOfWeek)  setApptError('dayOfWeek', { message: err.DayOfWeek[0] });
+      if (err?.AppointmentDate)  setApptError('appointmentDate', { message: err.AppointmentDate[0] });
       if (err?.StartTime)  setApptError('startTime', { message: err.StartTime[0] });
       if (err?.Notes)      setApptError('notes',     { message: err.Notes[0] });
     }
@@ -88,12 +104,15 @@ const AppointmentForm = () => {
 
   return (
     <Container className='mt-3 mb-3'>
-
+{console.log(`checking doctorsShift output in component`,doctorsShift)}
       {/* ── Form 1: Check Availability ── */}
       <Row>
         <Col md={8}>
           <h3>Check Doctor Availability</h3>
-          <Form onSubmit={handleSlotsSubmit(onCheckSlots)} className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
+          <Form 
+          //onSubmit={handleSlotsSubmit(onCheckSlots)} 
+          onSubmit={handleSlotsSubmit(onCheckSlotsByDate)}
+          className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
 
             <Form.Group controlId="docId" className='mb-3'>
               <Form.Label>Doctor</Form.Label>
@@ -111,7 +130,7 @@ const AppointmentForm = () => {
               <Form.Control.Feedback type="invalid">{slotsErrors.docId?.message}</Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group controlId="dOfW" className='mb-3'>
+            {/* <Form.Group controlId="dOfW" className='mb-3'>
               <Form.Label>Day of Week</Form.Label>
               <Form.Select
                 {...registerSlots('dOfW', { required: 'Please select a day.' })}
@@ -123,6 +142,16 @@ const AppointmentForm = () => {
                 ))}
               </Form.Select>
               <Form.Control.Feedback type="invalid">{slotsErrors.dOfW?.message}</Form.Control.Feedback>
+            </Form.Group> */}
+              <Form.Group controlId="dOfW" className='mb-3'>
+              <Form.Label>Day of Week</Form.Label>
+              <Form.Control type='date'
+                {...registerSlots('date', { required: 'Please select a date.' })}
+                isInvalid={!!slotsErrors.date}
+              >
+            
+              </Form.Control>
+              <Form.Control.Feedback type="invalid">{slotsErrors.date?.message}</Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group className='mb-3'>
@@ -195,7 +224,7 @@ const AppointmentForm = () => {
               <Form.Control.Feedback type="invalid">{apptErrors.patientId?.message}</Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group controlId="dayOfWeek">
+            {/* <Form.Group controlId="dayOfWeek">
               <Form.Label>Day of Week</Form.Label>
               <Form.Select
                 {...registerAppt('dayOfWeek', { required: 'Please select a day.' })}
@@ -207,6 +236,16 @@ const AppointmentForm = () => {
                 ))}
               </Form.Select>
               <Form.Control.Feedback type="invalid">{apptErrors.dayOfWeek?.message}</Form.Control.Feedback>
+            </Form.Group> */}
+
+                <Form.Group controlId="startTime">
+              <Form.Label>Appointment Date </Form.Label>
+              <Form.Control
+                type="date"
+                {...registerAppt('appointmentDate', { required: 'Please enter a date .' })}
+                isInvalid={!!apptErrors.appointmentDate}
+              />
+              <Form.Control.Feedback type="invalid">{apptErrors.appointmentDate?.message}</Form.Control.Feedback>
             </Form.Group>
 
             <Form.Group controlId="startTime">

@@ -6,6 +6,7 @@ import DoctorForm from './features/doctor/components/DoctorForm'
 import LoginForm from './features/auth/components/LoginForm'
 import NavBar from './features/navbar/NavBar'
 import PrivateRoute from './features/auth/components/PrivateRoute'
+import { ROLES } from './constants/roles'
 import Forbidden from './features/auth/components/Forbidden'
 import DoctorSchedule from './features/doctor/components/DoctorSchedule'
 import HomePage from './features/home/HomePage'
@@ -103,11 +104,12 @@ useEffect(() => {
           <Route path='/invoice/InvoiceByDate' element={<InvoiceByDateReport/>}></Route>
         <Route path='/payments/paymentpage' element={<PaymentPage/>}></Route>
          <Route path='/management/dashboard' element={<Dashboard/>}></Route>
+              {/* <Route path='/patients/patient-form' element={<PatientForm/>}></Route> */}
         <Route path='*' element={<NotFound/>}></Route>
        
        --private routes --
        <Route path="/patients/patient-form" element={
-        <PrivateRoute allowedRoles={['Admin']} requireAllRoles={false} fallbackUrl="/auth/forbidden" loginUrl="/login">
+        <PrivateRoute allowedRoles={[ROLES.Admin,ROLES.User]} requireAllRoles={false} fallbackUrl="/auth/forbidden" loginUrl="/login">
           <PatientForm/>
         </PrivateRoute>
        

@@ -36,7 +36,7 @@ const TodayAppointments = () => {
                   
                   <tbody>
                          {
-                            appointments.length >0&&
+                            appointments.length >0 &&
                             appointments.map((appointemnt)=>(
                                 <tr key={appointemnt.id}><td >{appointemnt.appointmentNumber}</td>
                                   <td>{appointemnt.dayOfWeek}</td>

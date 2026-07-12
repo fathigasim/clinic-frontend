@@ -3,7 +3,19 @@ import { doctorApi } from './doctorApi';
 
 
 
-
+export const getScheduledDoctors = createAsyncThunk(
+  'doctor/getListedScheduledDoctors',
+  async () => {
+    try {
+      const result = await doctorApi.getListedScheduledDoctorsApi();
+      console.log('All  listed scheduled Doctors Data:', result);
+      return result;
+    } catch (error) {
+      console.error('Error response data:', error.response?.data);
+      throw error;
+    }
+  }
+);
 export const getAllDoctors = createAsyncThunk(
   'doctor/getAllDoctors',
   async () => {
@@ -40,6 +52,20 @@ export const getDoctorsAvailableSlots = createAsyncThunk(
     try {
       const result = await doctorApi.getDoctorsAvailableSlotsApi(doctorId,dayOfWeek);
       console.log('Available Slots Data:', result);
+      return result;
+    } catch (error) {
+      console.error('Error response data:', error.response?.data);
+      throw error;
+    }
+  }
+);
+
+export const getDoctorsAvailableSlotsByDate = createAsyncThunk(
+  'doctor/getDoctorsAvailableSlotsByDate',
+  async ({doctorId,date}) => {
+    try {
+      const result = await doctorApi.getDoctorsAvailableSlotsByDateApi(doctorId,date);
+      console.log('Available Slots By Date:', result);
       return result;
     } catch (error) {
       console.error('Error response data:', error.response?.data);
@@ -119,13 +145,14 @@ if (status === 422) {
 );
 // Initial state
 const initialState = {
-
+  scheduledDoctors:[],
   doctors: [],
   doctorSchedule:null,
   data: null,
   loading: false,
   error: null,
   availableSlots: [],
+    availableSlotsByDate: []
 };
 
 // Slice
@@ -165,7 +192,18 @@ const doctorSlice = createSlice({
         state.loading = false;
         state.error = null;
       }) 
-
+  .addCase(getScheduledDoctors.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(getScheduledDoctors.fulfilled, (state,action) => {
+        console.log("getScheduledDoctors.fulfilled result",action.payload)
+       state.scheduledDoctors=action.payload;
+        state.loading = false;
+        state.error = null;
+      }).addCase(getScheduledDoctors.rejected, (state) => {
+        state.loading = false;
+        state.error = null;
+      }) 
        .addCase(getDoctorsAvailableSlots.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -175,6 +213,18 @@ const doctorSlice = createSlice({
         state.loading = false;
         state.error = null;
       }).addCase(getDoctorsAvailableSlots.rejected, (state) => {
+        state.loading = false;
+        state.error = null;
+      }) 
+       .addCase(getDoctorsAvailableSlotsByDate.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(getDoctorsAvailableSlotsByDate.fulfilled, (state,action) => {
+        console.log("getDoctorsAvailableSlotsByDate.fulfilled =>",action.payload)
+       state.availableSlots=action.payload
+        state.loading = false;
+        state.error = null;
+      }).addCase(getDoctorsAvailableSlotsByDate.rejected, (state) => {
         state.loading = false;
         state.error = null;
       }) 
@@ -209,8 +259,11 @@ export const {
 } = doctorSlice.actions;
 
 //  Selectors
+
+export const selectScheduledDoctors = (state) => state.doctor.scheduledDoctors;
 export const selectAllDoctors = (state) => state.doctor.doctors;
 export const selectAvailableSlots = (state) => state.doctor.availableSlots;
+export const selectavailableSlotsByDate= (state) => state.doctor.availableSlotsByDate;
 export const selectDoctorLoading = (state) => state.doctor.loading;
 export const selectDoctorError = (state) => state.doctor.error;
 export const selectDoctorSchedule = (state) => state.doctor.doctorSchedule;

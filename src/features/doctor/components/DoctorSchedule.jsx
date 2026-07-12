@@ -1,6 +1,6 @@
 import  { useEffect } from 'react'
 import { useDispatch,useSelector } from 'react-redux'
-import { addDoctorSchedule,getAllDoctors,selectAllDoctors } from '../doctorSlice';
+import { addDoctorSchedule,getAllDoctors,getScheduledDoctors,selectAllDoctors,selectScheduledDoctors } from '../doctorSlice';
 import {Row,Container,FormControl,FormGroup, FormSelect, Button} from 'react-bootstrap'
 import {toast} from 'react-toastify'
 import { useForm } from 'react-hook-form';
@@ -42,11 +42,13 @@ handleServerErrors(error);
     
   
 
-  const doctors=useSelector(selectAllDoctors);
+//   const doctors=useSelector(selectAllDoctors);
+const doctors=useSelector(selectSheduledDoctors);
   const dispatch=useDispatch();
 
   useEffect(()=>{
-    dispatch(getAllDoctors())
+    // dispatch(getAllDoctors())
+    dispatch(getScheduledDoctors())
   },[dispatch])
 
   return (

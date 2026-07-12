@@ -77,6 +77,19 @@ export const getDoctorShiftToday = createAsyncThunk(
   }
 );
 
+export const getDoctorShiftDate = createAsyncThunk(
+  'appointment/getDoctorShiftDate',
+  async (_,{rejectWithValue}) => {
+    try {
+      const result = await AppointmentApi.getDoctorsShiftDateApi();
+      console.log('Doctors todays shift:', result);
+      return result;
+    } catch (error) {
+      console.error('Error response data:', error.response?.data);
+      return rejectWithValue(error.response?.data || 'Not available.');
+    }
+  }
+);
 
 const initialState = {
   notInvoicedAppointments:[],
