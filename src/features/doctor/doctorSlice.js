@@ -22,7 +22,7 @@ export const getAllDoctors = createAsyncThunk(
     try {
       const result = await doctorApi.getAllDoctorsApi();
       console.log('All Doctors Data:', result);
-      return result.data;
+      return result;
     } catch (error) {
       console.error('Error response data:', error.response?.data);
       throw error;
@@ -84,27 +84,32 @@ export const addDoctor = createAsyncThunk(
       console.log('Added Doctor Data:', result);
       return result;
     } catch (error) {
-      console.error('Error response data:', error.response?.data);
-        rejectWithValue(error.response?.data || error.message || "Failed to add patient");
-      //  Handle array of errors
-      const errors = error.response.data;
-  console.log("testing errors before reject with values",errors)
-      if (Array.isArray(errors)) {
-        // If it's an array, join into a string or return as-is
-        return rejectWithValue(errors);
+       const status = error.response?.status;
+      const data = error.response?.data;
+      
+      //  if (status === 400) {
+      //   // FluentValidation errors: { "": [...], "DoctorId": [...] }
+      //   // OR general error: { message: "..." }
+      //   return rejectWithValue(data?.errors ?? data);
+      // }
+      if (status === 400) {
+  return rejectWithValue({ 
+    fieldErrors: data?.errors ?? null, 
+    message: data?.message ?? "Validation failed." 
+  });
+}
+
+      if (status === 404) {
+        return rejectWithValue({ message: "Resource not found." });
+      }
+if (status === 422) {
+       return rejectWithValue({ message: data?.detail ?? "Unable to process request." });
+   }
+      if (status === 500) {
+        return rejectWithValue({ message: "Server error, please try again later." });
       }
 
-      // If it's an object with errors property
-      if (errors?.errors) {
-        return rejectWithValue(errors.errors);
-      }
-
-      // If it's an object with message
-      if (errors?.message) {
-        return rejectWithValue(errors.message);
-      }
-
-      return rejectWithValue("Failed to add doctor");
+      return rejectWithValue({ message: "Failed to add doctor schedule." });
      
     }
   }
@@ -123,11 +128,18 @@ export const addDoctorSchedule = createAsyncThunk(
       const status = error.response?.status;
       const data = error.response?.data;
 
+
       if (status === 400) {
-        // FluentValidation errors: { "": [...], "DoctorId": [...] }
-        // OR general error: { message: "..." }
-        return rejectWithValue(data?.errors ?? data);
-      }
+  return rejectWithValue({ 
+    fieldErrors: data?.errors ?? null, 
+    message: data?.message ?? "Validation failed." 
+  });
+}
+      // if (status === 400) {
+      //   // FluentValidation errors: { "": [...], "DoctorId": [...] }
+      //   // OR general error: { message: "..." }
+      //   return rejectWithValue(data?.errors ?? data);
+      // }
 
       if (status === 404) {
         return rejectWithValue({ message: "Resource not found." });
@@ -185,7 +197,7 @@ const doctorSlice = createSlice({
         state.error = null;
       }).addCase(getAllDoctors.fulfilled, (state,action) => {
         console.log("getAllDoctors.fulfilled result",action.payload)
-       state.doctors=action.payload.items
+       state.doctors=action.payload.data.items||[];
         state.loading = false;
         state.error = null;
       }).addCase(getAllDoctors.rejected, (state) => {

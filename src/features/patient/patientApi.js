@@ -6,6 +6,12 @@
     console.log(`api todays patients data : ${response.data}`)
     return response.data;
   },
+
+  fetchPatientByIdApi: async (id) => {
+    const response = await api.get(`/Patient/${id}`);
+    console.log(`api get patient data : ${response.data}`)
+    return response.data;
+  },
  fetchTodaysPatientsApi: async () => {
     const response = await api.get('/Patient/TodaysPatients');
     console.log(`api todays patients data : ${response.data}`)
@@ -21,10 +27,10 @@
     console.log(`api product data : ${response.data}`)
     return response.data;
   },
-//      updateProduct: async (Id, formData) => {
-//     const response = await api.put(`/Product/${Id}`, formData,{headers :{ 'Content-Type':'multipart/form-data'}});
-//     console.log(`api product data : ${response.data}`)
-//     return response.data;
-//   },
+     updatePatient: async (id, payload) => {
+    const response = await api.put(`/Patient/${id}`, payload);
+    console.log(`api product data : ${response.data}`)
+    return response.data;
+  },
 }
   

@@ -1,50 +1,60 @@
 
-import { useState } from 'react'
+
 import { Form,Button, FormControl,Container,FormGroup,FormSelect } from 'react-bootstrap'
 import {Col,Row} from 'react-bootstrap'
 import { useDispatch ,useSelector} from 'react-redux'
 import {addDoctor} from '../doctorSlice'
 import { toast } from 'react-toastify'
 import { selectDoctorLoading } from '../doctorSlice'
+import { useForm } from 'react-hook-form'
 const DoctorForm = () => {
-
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+    watch,
+    reset
+  } = useForm();
   const dispatch=useDispatch();
   const loading=useSelector(selectDoctorLoading);
-   const [firstname,setFirstname]=useState()
-   const [lastname,setLastName]=useState()
-   const [specialization,setSpecialization]=useState()
-   const [gender,setGender]=useState() 
-   const [phone,setPhone]=useState()
-   const [email,setEmail]=useState()
-   const [formErrors,setFormErrors]=useState({firstname,lastname,specialization,gender,phone,email})
-    const  addPatientForm =async (e)=>{
+  //  const [firstname,setFirstname]=useState()
+  //  const [lastname,setLastName]=useState()
+  //  const [specialization,setSpecialization]=useState()
+  //  const [gender,setGender]=useState() 
+  //  const [phone,setPhone]=useState()
+  //  const [email,setEmail]=useState()
+  
+    const  addDoctorForm =async (data,e)=>{
             e.preventDefault();
-          setFormErrors({firstname:"",lastname:"",specialization:"",gender:"",phone:"",email:""})
+      
            try{
-         
-    const result=  await dispatch(addDoctor({firstname,lastname,specialization,gender,phone,email})).unwrap()
+           const payload = {
+        firstname: data.firstname  ||null,
+        lastname: data.lastname || null,
+        specialization: data.specialization,
+        gender:data.gender,
+        phone:data.phone,
+        email:data.email
+   
+    };
+    const result=  await dispatch(addDoctor(payload)).unwrap()
                                toast.success(result.data)
-                               setFirstname("")
-                               setLastName("")
-                               setPhone("")
-                               setEmail("")
-                               setGender("")
-                               setSpecialization("")
+                             reset();
    }
            catch(err){
-            console.log("doctor form component errors " ,err)
-            
-              setFormErrors({
-      firstname: err?.FirstName?.[0],
-      lastname: err?.LastName?.[0],
-      specialization: err?.Specialization?.[0],
-      gender: err?.Gender?.[0],
-      phone: err?.Phone?.[0],
-      email:err?.Email?.[0]
-    });
-
-
-           }
+            console.log("doctor form component errors " ,err.fieldErrors)
+            if (err.fieldErrors?.Firstname)   setError('firstname',  { message: err.fieldErrors.Firstname[0] });
+      if (err?.fieldErrors?.Lastname)  setError('lastname', { message: err.fieldErrors.Lastname[0] });
+      if (err?.fieldErrors?.Gender)  setError('gender', { message: err.fieldErrors.Gender[0] });
+      if (err?.fieldErrors?.Phone)  setError('phone', { message: err.fieldErrors.Phone[0] });
+      if (err?.fieldErrors?.Email)      setError('email',     { message: err.fieldErrors.Email[0] });
+           
+      // non-field error (422 business rule, 404, 500, etc.)
+  if (!err?.fieldErrors && err?.message) {
+    setError('root.serverError', { type: 'manual', message: err.message });
+  }
+    }
             
   }
   
@@ -57,97 +67,91 @@ const DoctorForm = () => {
     <div>
           <p> Doctor Registeration Form </p>
     </div>
-    <Form noValidate className='justify-between'  onSubmit={addPatientForm}>
+    <div>
+       {errors.root?.serverError?.message && (
+    <div className="alert alert-warning">
+      {errors.root.serverError.message}
+    </div>
+  )}
+  {Object.keys(errors).filter(k => k !== 'root').length > 0 && (
+    <div className="alert alert-danger">
+      <h5>Please fix the following errors:</h5>
+      <ul className="mb-0">
+        {Object.keys(errors)
+          .filter(k => k !== 'root')
+          .map((key) => (
+            <li key={key}>{errors[key]?.message}</li>
+          ))}
+      </ul>
+    </div>
+  )}
+      {/* {Object.keys(errors).length > 0 && (
+  <div className="alert alert-danger">
+    <h5>Please fix the following errors:</h5>
+    <ul className="mb-0">
+      {Object.keys(errors).map((key) => (
+        <li key={key}>{errors[key]?.message}</li>
+      ))}
+    </ul>
+  </div>
+)} */}
+    </div>
+    <Form noValidate className='justify-between'  onSubmit={handleSubmit(addDoctorForm)}>
           <FormGroup className="mb-3" controlId="firstnameId">
-         <FormControl value={firstname} onChange={e=>{setFirstname(e.target.value)
-               if (formErrors.firstname) {
-      setFormErrors(prev => ({
-        ...prev,
-        firstname: undefined
-      }))}
-
-
-         }}
-           isInvalid={!!formErrors.firstname}
+         <FormControl 
+         {...register('firstname', { required: 'first name required.' })}
+           isInvalid={!!errors.firstname}
          placeholder='First Name'/>
           <Form.Control.Feedback type="invalid">
-          {formErrors.firstname}
+          {errors.firstname?.message}
            </Form.Control.Feedback>
           </FormGroup>
 
           <FormGroup className="mb-3" controlId="lastnameId">
-         <FormControl value={lastname} onChange={e=>{setLastName(e.target.value)
-
-                 if (formErrors.lastname) {
-      setFormErrors(prev => ({
-        ...prev,
-        lastname: undefined
-      }))}
-         }
+         <FormControl 
+       
+ {...register('lastname', { required: 'last name is required.' })}
+         
         
-        }   isInvalid={!!formErrors.lastname} placeholder='Last Name'/>
+           isInvalid={!!errors.lastname} placeholder='Last Name'/>
         <Form.Control.Feedback type="invalid">
-          {formErrors.lastname}
+          {errors.lastname?.message}
            </Form.Control.Feedback>
           </FormGroup>
           <FormGroup className="mb-3" controlId="emailId">
-         <FormControl value={email} onChange={e=>{setEmail(e.target.value)
-
-               if (formErrors.email) {
-      setFormErrors(prev => ({
-        ...prev,
-        email: undefined
-      }))}
-         }} isInvalid={!!formErrors.email} placeholder='Email'/>
+         <FormControl 
+ {...register('email', { required: 'email required.' })}
+          isInvalid={!!errors.email} placeholder='Email'/>
            <Form.Control.Feedback type="invalid">
-          {formErrors.email}
+          {errors.email?.message}
            </Form.Control.Feedback>
           </FormGroup>
           <FormGroup className="mb-3" controlId="specializationId">
-         <FormControl type='text' value={specialization} onChange={e=>{setSpecialization(e.target.value)
-                    if (formErrors.specialization) {
-      setFormErrors(prev => ({
-        ...prev,
-        specialization: undefined
-      }))}
-
-         }} isInvalid={!!formErrors.specialization} placeholder='specialization'/>
+         <FormControl 
+          {...register('specialization', { required: 'specialization required.' })}
+         isInvalid={!!errors.specialization} placeholder='specialization'/>
                 <Form.Control.Feedback type="invalid">
-          {formErrors.specialization}
+          {errors.specialization?.message}
            </Form.Control.Feedback>
           </FormGroup>
           <FormGroup className="mb-3" controlId="genderId">
-         <FormSelect  value={gender} onChange={e=>{setGender(e.target.value)
-
-                       if (formErrors.gender) {
-      setFormErrors(prev => ({
-        ...prev,
-        gender: undefined
-      }))}
-         }
-        
-        }  isInvalid={!!formErrors.gender}>
-             <option value=" ">---Please Select Gender---</option>
+         <FormSelect 
+       {...register('gender', { required: 'Gender required.' })}
+          isInvalid={!!errors.gender}>
+             <option value="" disabled>---Please Select Gender---</option>
              <option value="male"> male</option>
              <option value="female"> female</option>
           </FormSelect>
                 <Form.Control.Feedback type="invalid">
-          {formErrors.gender}
+          {errors.gender?.message}
            </Form.Control.Feedback>
           </FormGroup>
           <FormGroup className="mb-3" controlId="phoneId">
-         <FormControl value={phone} onChange={e=>{setPhone(e.target.value)
-                      if (formErrors.phone) {
-      setFormErrors(prev => ({
-        ...prev,
-        phone: undefined
-      }))}
-
-         }
-        
-        }  isInvalid={!!formErrors.phone} placeholder='Phone'/>
+         <FormControl
+          {...register('phone', { required: 'phone required.' })}
+          isInvalid={!!errors.phone} placeholder='Phone'/>
                  <Form.Control.Feedback type="invalid">
-          {formErrors.phone}
+          {errors.phone?.message}
            </Form.Control.Feedback>
           </FormGroup>
 

@@ -7,6 +7,9 @@ export const getTodaysAppointments = createAsyncThunk(
     try {
       const result = await AppointmentApi.getTodaysAppointmentsApi({page:payload.page,pageSize:payload.pageSize});
       console.log('Todays appointments thunk result =>:', result);
+      if(!result.isSuccess){
+        return  rejectWithValue(result.errorMessage)
+      }
       return result.data;
     } catch (error) {
       console.error('Error response data:', error.response?.data);
@@ -21,7 +24,7 @@ export const getNotInvoicedAppointments = createAsyncThunk(
     try {
       const result = await AppointmentApi.getNotInvoicedAppointmentsApi();
       console.log('Not invoiced appointments =>:', result);
-      return result.data;
+      return result;
     } catch (error) {
       console.error('Error response data:', error.response?.data);
       return rejectWithValue(error.response?.data || 'Not available.');
@@ -94,6 +97,7 @@ export const getDoctorShiftDate = createAsyncThunk(
 const initialState = {
   notInvoicedAppointments:[],
   todaysAppointments:[],
+  errorMessage:null,
   totalPages:0,
   doctorsavailable:[],
   appointments: [],
@@ -115,24 +119,33 @@ const appointmentSlice = createSlice({
 
   },
   extraReducers: (builder) => {
-    builder
-    .addCase(getTodaysAppointments.pending, (state) => {
-        
-        state.loading = true;
-        state.error = null;
-      }).addCase(getTodaysAppointments.fulfilled, (state,action) => {
-        state.todaysAppointments=action.payload.items;
-        state.totalPages=action.payload.totalPages;
-        state.loading = false;
-        state.error = null;
-      }).addCase(getTodaysAppointments.rejected, (state) => {
-        state.loading = false;
-        state.error = null;
-      }) 
+   builder
+  .addCase(getTodaysAppointments.pending, (state) => {
+    state.loading = true;
+    state.error = null;
+  })
+  .addCase(getTodaysAppointments.fulfilled, (state, action) => {
+    console.log(`Extra reducers thunk Payload data`, action.payload);
+    
+    // action.payload is exactly what you returned from the thunk: `result.data`
+    // You no longer need if/else checks for errors here!
+    state.todaysAppointments = action.payload.items || [];
+    state.totalPages = action.payload.totalPages; 
+    
+    state.loading = false;
+    state.error = null;
+  })
+  .addCase(getTodaysAppointments.rejected, (state, action) => {
+    state.loading = false;
+    
+    // action.payload contains the string passed into `rejectWithValue`
+    state.error = action.payload || 'Something went wrong';
+  })
         .addCase(getNotInvoicedAppointments.pending, (state) => {
         state.loading = true;
         state.error = null;
       }).addCase(getNotInvoicedAppointments.fulfilled, (state,action) => {
+        console.log(`not invoiced appointments thunk extra reducers`,action.payload.id)
         state.notInvoicedAppointments=action.payload;
         state.loading = false;
         state.error = null;

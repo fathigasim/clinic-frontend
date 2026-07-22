@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -9,11 +9,17 @@ import {
   FormControl,
   Col,
   Row,
-  Container,
+//  Container,
   Button,
 } from 'react-bootstrap';
 
 const RegisterForm = () => {
+     useEffect(() => {
+      document.body.classList.add("auth-body");
+      return () => {
+        document.body.classList.remove("auth-body");
+      };
+    }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formErrors, setFormErrors] = useState({});
@@ -61,11 +67,11 @@ toast.success('Registration successful! Redirecting to login...', {
   };
 
   return (
-    <Container className="mt-3">
+    <div className="auth-body " >
       <Row>
-        <Col md={4}>
+        <Col md={4} className='mx-auto my-auto mt-5' >
           <p>Register Form</p>
-          <Form noValidate onSubmit={handleSubmit}>
+          <Form noValidate onSubmit={handleSubmit} className='align-items-center justify-content-center'>
             <FormGroup className="mb-3" controlId="emailId">
               <FormControl
                 type="email"
@@ -104,7 +110,7 @@ toast.success('Registration successful! Redirecting to login...', {
           </Form>
         </Col>
       </Row>
-    </Container>
+    </div>
   );
 };
 

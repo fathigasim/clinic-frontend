@@ -8,7 +8,7 @@
     return response.data;
   },
   getListedScheduledDoctorsApi: async () => {
-    const response = await api.get('/doctors');
+    const response = await api.get('/doctors/scheduled-doctors');
     console.log(`api listed doctors data : ${response.data}`)
     return response.data;
   },

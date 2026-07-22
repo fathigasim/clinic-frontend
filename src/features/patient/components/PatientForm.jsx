@@ -57,8 +57,8 @@ const PatientForm = () => {
   
   return (
     <>
-    <Container className='mt-5'>
-        <Row>
+    <Container className='mt-5 justify-content-center mx-auto my-4'>
+        <Row className='justify-content-center'>
    <Col md={6} >
    <Row >
     <div className='mb-3 align-items-center'>

@@ -45,6 +45,32 @@ export const getPatients = createAsyncThunk(
     }
   }
 );
+
+export const getPatientById = createAsyncThunk(
+  'patients/getpatientById',
+  async (id,{rejectWithValue}) => {
+    try {
+      
+      const result = await patientApi.fetchPatientByIdApi(id);
+      console.log('Thunk get patient by Id result => :', result);
+      return result;
+    } catch (error) {
+      console.error('Thunk get patients error message=>', error.response.data);
+         if(!error.response){
+      return rejectWithValue("Sever network error");
+         }
+            if(!error.response.data){
+           
+      return rejectWithValue("Patients not avaiable");
+         }
+             if(error.response.data){
+           const errors=   error.response.data.errors
+      return rejectWithValue(errors);
+         }
+    }
+  }
+);
+
 export const getTodaysPatients = createAsyncThunk(
   'patients/gettodayspatients',
   async (_,{rejectWithValue}) => {
@@ -105,11 +131,50 @@ export const addPatient = createAsyncThunk(
 );
 
 
+export const UpdatePatient = createAsyncThunk(
+  'patients/updatePatient',
+  async ({id,patient}, { rejectWithValue }) => {
+    try {
+      const result = await patientApi.updatePatient(id,patient);
+      console.log(' Patient update data:', result);
+      return result;
+    } catch (error) {
+          const status = error.response?.status;
+      const data = error.response?.data;
+    
+      if (status === 400) {
+        console.log(`Checking console fluent api errors`,data?.errors);
+  return rejectWithValue({ 
+    fieldErrors: data?.errors ?? null, 
+    message: data?.message ?? "Validation failed." 
+  });
+
+  
+}
+
+      if (status === 404) {
+        return rejectWithValue({ message: "Resource not found." });
+      }
+if (status === 422) {
+       return rejectWithValue({ message: data?.detail ?? "Unable to process request." });
+   }
+      if (status === 500) {
+        return rejectWithValue({ message: "Server error, please try again later." });
+      }
+
+      return rejectWithValue({ message: "Failed to update patient." });
+     
+    }
+  }
+);
+
+
 
 // Initial state
 const initialState = {
   todayspatients:[],
   patientsResult:null,
+  patient:null,
   message:null,
   loading: false,
   error: null,
@@ -146,6 +211,21 @@ const patientSlice = createSlice({
         state.error = action.payload.errorMessage || "Failed to get patients";
         state.message = null;
       }) 
+      
+      .addCase(getPatientById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      }).addCase(getPatientById.fulfilled, (state,action) => {
+        console.log('fullfiled payload message ',action.payload);
+       state.patient=action.payload;
+        state.loading = false;
+        state.error = null;
+      }).addCase(getPatientById.rejected, (state) => {
+        state.loading = false;
+        state.error = null;//action.payload.errorMessage || "Failed to get patients";
+        state.message = null;
+      }) 
       .addCase(addPatient.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -161,6 +241,20 @@ const patientSlice = createSlice({
         state.message = null;
       }) 
       //
+      .addCase(UpdatePatient.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
+      }).addCase(UpdatePatient.fulfilled, (state,action) => {
+        console.log('fullfiled payload message ',action.payload.data);
+       state.message=action.payload;
+        state.loading = false;
+        state.error = null;
+      }).addCase(UpdatePatient.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload.errorMessage || "Failed to add patient";
+        state.message = null;
+      }) 
        .addCase(getTodaysPatients.pending, (state) => {
         state.loading = true;
         state.error = null;

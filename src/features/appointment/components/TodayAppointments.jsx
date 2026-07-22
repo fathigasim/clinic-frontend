@@ -1,30 +1,41 @@
 import { useEffect } from "react"
 import { useSearchParams } from "react-router"
-import { getTodaysAppointments,selectTodaysAppointments,selectAppointmentLoading,selectTotalpages } from "../AppointmentSlice"
+import { getTodaysAppointments,selectTotalpages } from "../AppointmentSlice"
 import { useDispatch,useSelector } from "react-redux"
+import {Alert} from "react-bootstrap"
 
 import Paginationbootstrap from "../../../components/Pagintationbootstrap"
 
 
+
 const TodayAppointments = () => {
+  //  const [error,setError]=useState("");
     const [searchParams,setSearchParams] = useSearchParams();
       const currentPage = Number(searchParams.get("page")) || 1;
+       
   const pSize = Number(searchParams.get("pageSize")) || 5;
     const dispatch=useDispatch();
-    const loading=useSelector(selectAppointmentLoading); 
-    const appointments=useSelector(selectTodaysAppointments);
+    // const loading=useSelector(selectAppointmentLoading); 
+    // const appointments=useSelector(selectTodaysAppointments);
+    const { todaysAppointments: appointments, loading, error } = useSelector((state) => state.appointment)
     const totalPages=useSelector(selectTotalpages);
       useEffect(() => {
-
-     dispatch(getTodaysAppointments({  page: currentPage,pageSize: pSize }));
-      
+const todaysAppointments=()=>{
+  
+   dispatch(getTodaysAppointments({  page: currentPage,pageSize: pSize })).unwrap();
+ 
+}
+    todaysAppointments();
   }, [dispatch, currentPage, pSize]);
   return (
     
-        <div  className="p-4 border rounded ">
-        {console.log("Checking todays appointments",appointments)}
+        <div  className="">
+        {loading? <div>....Loading</div>:(
+
+                error ? (<Alert>{error}</Alert>) :(
+            // {console.log("Checking todays appointments",appointments)}
        
-            <table className="table table-striped ">
+            <table className="table">
                 <thead>
                     <tr>
                         <th className="w-50">Appointment Number</th>
@@ -47,6 +58,12 @@ const TodayAppointments = () => {
                          }
                   </tbody>
             </table>
+        
+          )
+        
+        )}
+        
+        
           {!loading && appointments.length > 0 && (
       
           <Paginationbootstrap

@@ -189,6 +189,7 @@ const initialState = {
   isAuthenticated: false,  // don't trust the token yet
   loading: true,           // block PrivateRoute until we verify
    mfaLoading: false,     //  new — for setup/enable/disable/status
+   forgotPasswordLoading: false,
   token: null,
   
   error: null,
@@ -259,14 +260,14 @@ const authSlice = createSlice({
       }) 
       //forgot password
        .addCase(forgotPassword.pending, (state) => {
-        state.loading = true;
+        state.forgotPasswordLoading = true;
         state.error = null;
       }).addCase(forgotPassword.fulfilled, (state) => {
       
-        state.loading = false;
+        state.forgotPasswordLoading = false;
         state.error = null;
       }).addCase(forgotPassword.rejected, (state,action) => {
-        state.loading = false;
+        state.forgotPasswordLoading = false;
         state.error = action.payload;
       }) 
       //reset password
@@ -404,6 +405,7 @@ export const {
 
 //  Selectors
 export const selectAuthLoading = (state) => state.auth.loading;
+export const selectforegetPasswordLoading = (state) => state.auth.forgotPasswordLoading;
 export const selectMfaLoading = (state) => state.auth.mfaLoading;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectAuthError = (state) => state.auth.error;

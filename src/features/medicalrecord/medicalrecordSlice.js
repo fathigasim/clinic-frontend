@@ -14,33 +14,35 @@ export const addmedical = createAsyncThunk(
       console.log('Added Medical Record Data:', result);
       return result;
     } catch (error) {
-      console.error('Error response status:', error.response?.status);
-      if (error.response?.status === 409) {
-      return  rejectWithValue({exceptionMessage:'record already exists'});
+      const status = error.response?.status;
+      const data = error.response?.data;
+      
+      //  if (status === 400) {
+      //   // FluentValidation errors: { "": [...], "DoctorId": [...] }
+      //   // OR general error: { message: "..." }
+      //   return rejectWithValue(data?.errors ?? data);
+      // }
+      if (status === 400) {
+        console.log(`Checking console fluent api errors`,data?.errors);
+  return rejectWithValue({ 
+    fieldErrors: data?.errors ?? null, 
+    message: data?.message ?? "Validation failed." 
+  });
+
+  
+}
+
+      if (status === 404) {
+        return rejectWithValue({ message: "Resource not found." });
       }
-        if (error.response?.status === 404) {
-      return  rejectWithValue({exceptionMessage:'The requested item was not found'});
-      }
-      console.error('Error response data:', error.response?.data);
-      //  Handle array of errors
-      const errors = error?.response?.data;
-  console.log("testing errors before reject with values",errors)
-      if (Array.isArray(errors)) {
-        // If it's an array, join into a string or return as-is
-        return rejectWithValue(errors);
+if (status === 422) {
+       return rejectWithValue({ message: data?.detail ?? "Unable to process request." });
+   }
+      if (status === 500) {
+        return rejectWithValue({ message: "Server error, please try again later." });
       }
 
-      // If it's an object with errors property
-      if (errors?.errors) {
-        return rejectWithValue(errors.errors);
-      }
-
-      // If it's an object with message
-      if (errors?.message) {
-        return rejectWithValue(errors.message);
-      }
-
-      return rejectWithValue("Failed to add medical record");
+      return rejectWithValue({ message: "Failed to add doctor schedule." });
      
     }
   }

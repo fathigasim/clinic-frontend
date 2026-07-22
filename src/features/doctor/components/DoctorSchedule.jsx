@@ -1,10 +1,16 @@
 import  { useEffect } from 'react'
 import { useDispatch,useSelector } from 'react-redux'
-import { addDoctorSchedule,getAllDoctors,getScheduledDoctors,selectAllDoctors,selectScheduledDoctors } from '../doctorSlice';
-import {Row,Container,FormControl,FormGroup, FormSelect, Button} from 'react-bootstrap'
+import { addDoctorSchedule,
+    getAllDoctors,
+  //   getScheduledDoctors,
+    //selectAllDoctors,
+//    selectScheduledDoctors
+ } from '../doctorSlice';
+import {Row,Col,Container,FormControl,FormGroup, FormSelect, Button} from 'react-bootstrap'
 import {toast} from 'react-toastify'
 import { useForm } from 'react-hook-form';
 import { useFormServerErrors } from '../../../hooks/useFormServerErrors';
+
 const DoctorSchedule = () => {
 
 
@@ -43,17 +49,18 @@ handleServerErrors(error);
   
 
 //   const doctors=useSelector(selectAllDoctors);
-const doctors=useSelector(selectSheduledDoctors);
+const {loading,doctors}=useSelector((state) => state.doctor);
   const dispatch=useDispatch();
 
   useEffect(()=>{
-    // dispatch(getAllDoctors())
-    dispatch(getScheduledDoctors())
+     dispatch(getAllDoctors())
+    //dispatch(getScheduledDoctors())
   },[dispatch])
 
   return (
     <>
-    <Container>
+    <Container className='fluid ' >
+        <Col md={6} sm={12} xl={6}>
       {errors.root && (
     <div className="alert alert-danger mt-2">
         {errors.root.message}
@@ -64,6 +71,7 @@ const doctors=useSelector(selectSheduledDoctors);
     <Row>
 
  <FormGroup className='mb-3'>
+    <lable>Doctor</lable>
     <FormSelect 
         {...register("doctorId", { 
             required: "Doctor selection is required.",
@@ -85,6 +93,7 @@ const doctors=useSelector(selectSheduledDoctors);
     )}
 </FormGroup>
       <FormGroup className='mb-3'>
+        <label>Date </label>
     <FormControl
         type='date'
         {...register("scheduleDate", { required: "Schedule date is required." })}
@@ -97,6 +106,7 @@ const doctors=useSelector(selectSheduledDoctors);
 </FormGroup>
 
 <FormGroup className='mb-3'>
+    <lable>Start Time</lable>
     <FormControl
         type='time'
         {...register("startTime", { required: "Start time is required." })}
@@ -109,6 +119,7 @@ const doctors=useSelector(selectSheduledDoctors);
 </FormGroup>
 
 <FormGroup className='mb-3'>
+    <lable>End Time</lable>
     <FormControl
         type='time'
         {...register("endTime", {
@@ -123,9 +134,11 @@ const doctors=useSelector(selectSheduledDoctors);
                     {errors.endTime && errors.endTime.message}
                 </FormControl.Feedback>
 </FormGroup>
-
-<Button type='button' onClick={handleSubmit(onSubmit)}>Save Schedule</Button>
+<Col xs={12} className="pt-2">
+<Button type='button' disabled={loading} onClick={handleSubmit(onSubmit)}>{loading ? '...Submitting' : 'Save Schedule'}</Button>
+</Col>
       </Row>
+      </Col>
       </Container>
     </>
   )

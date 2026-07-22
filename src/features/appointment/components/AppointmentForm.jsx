@@ -2,7 +2,7 @@ import { useEffect,useState } from 'react'
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
-import { addAppointment, getDoctorShiftToday, selectTodaysAvailableDoctors } from '../AppointmentSlice';
+import { addAppointment,  } from '../AppointmentSlice';
 import { getTodaysPatients, selectTodaysPatients, selectPatientMessage } from '../../patient/patientSlice'
 import { 
   getDoctorsAvailableSlots, 
@@ -90,15 +90,15 @@ const AppointmentForm = () => {
     }
   };
 
-  const daysOfWeek = [
-    { label: 'Sunday', value: 0 },
-    { label: 'Monday', value: 1 },
-    { label: 'Tuesday', value: 2 },
-    { label: 'Wednesday', value: 3 },
-    { label: 'Thursday', value: 4 },
-    { label: 'Friday', value: 5 },
-    { label: 'Saturday', value: 6 },
-  ];
+  // const daysOfWeek = [
+  //   { label: 'Sunday', value: 0 },
+  //   { label: 'Monday', value: 1 },
+  //   { label: 'Tuesday', value: 2 },
+  //   { label: 'Wednesday', value: 3 },
+  //   { label: 'Thursday', value: 4 },
+  //   { label: 'Friday', value: 5 },
+  //   { label: 'Saturday', value: 6 },
+  // ];
 
   const selectedDOfW = watchSlots('dOfW');
 
