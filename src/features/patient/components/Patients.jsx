@@ -3,9 +3,10 @@ import { getPatients,selectPatientsResult,selectPatientLoading } from '../patien
 import Paginationbootstrap from '../../../components/Pagintationbootstrap';
 import PaginationbootstrapElipsed from '../../../components/ElipsedPagination';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLoaderData, useSearchParams } from 'react-router-dom';
 import { Button, Form, FormControl,Row,Col, Container,Table,Spinner } from 'react-bootstrap';
-
+import { useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 const Patients = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const paramsPage = Number(searchParams.get("page") || "1");
@@ -16,7 +17,9 @@ const Patients = () => {
     const dispatch = useDispatch();
     const patientResult = useSelector(selectPatientsResult);
     const loading = useSelector(selectPatientLoading);
+    const loaction=useLocation();
     useEffect(() => {
+      toast.info(loaction.state?.message)
         // Fetch patients when component mounts or when page changes
         dispatch(getPatients({ q: query, page: paramsPage, pageSize: paramsPageSize }));
     }, [dispatch, paramsPage, paramsPageSize]); // re-fetch when page or pageSize changes

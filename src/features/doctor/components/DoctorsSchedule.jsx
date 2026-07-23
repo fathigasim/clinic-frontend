@@ -3,6 +3,7 @@ import {useEffect} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDoctorsSchedule, selectDoctorSchedule } from '../doctorSlice';
 import {Container} from 'react-bootstrap';
+import { Link } from 'react-router';
  const DoctorsSchedule = () => {
 const dispatch = useDispatch();
 const doctorSchedule = useSelector(selectDoctorSchedule);
@@ -36,13 +37,24 @@ useEffect(() => {
               </tr>
             </thead>
             <tbody>
-              {doctorSchedule?.schedule.Sunday?.map((doctor) => (
+              {/* {doctorSchedule?.schedule.scheduleDate?.map((doctor) => (
                 <tr key={doctor.id}>
                   <td>{doctor.doctorName}</td>
                   <td>{doctor.startTime}</td>
                   <td>{doctor.endTime}</td>
                 </tr>
-              ))}
+              ))} */}
+              {Object.entries(doctorSchedule?.schedule ?? {}).map(([date, doctors]) =>
+  doctors.map((doctor) => (
+    <tr key={`${doctor.doctorId}-${date}`}>
+      <td>{date}</td>
+      <td>{doctor.doctorName}</td>
+      <td>{doctor.startTime}</td>
+      <td>{doctor.endTime}</td>
+      <td><Link to={`/Doctors/editdoctors/${doctor.doctorId}`}>Edit</Link></td>
+    </tr>
+  ))
+)}
             </tbody>
           </table>
      </div>

@@ -1,11 +1,13 @@
 import { useEffect,useState } from 'react'
-import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap'
+import { Container, Row, Col, Form, Button, Alert, FormGroup } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { addAppointment,  } from '../AppointmentSlice';
-import { getTodaysPatients, selectTodaysPatients, selectPatientMessage } from '../../patient/patientSlice'
+import { getTodaysPatients, selectTodaysPatients,
+  // selectPatientMessage 
+  } from '../../patient/patientSlice'
 import { 
-  getDoctorsAvailableSlots, 
+ // getDoctorsAvailableSlots, 
   getDoctorsAvailableSlotsByDate, 
   selectAvailableSlots,
   getScheduledDoctors, 
@@ -16,7 +18,7 @@ import { toast } from 'react-toastify';
 const AppointmentForm = () => {
   const doctorsShift = useSelector(selectScheduledDoctors);
   const todayPatients = useSelector(selectTodaysPatients);
-  const patientsMessage = useSelector(selectPatientMessage);
+ // const patientsMessage = useSelector(selectPatientMessage);
   const doctorSlots = useSelector(selectAvailableSlots);
   const [slotsChecked, setSlotsChecked] = useState(false);
   const dispatch = useDispatch();
@@ -44,13 +46,13 @@ const AppointmentForm = () => {
   }, [dispatch]);
 
   // Form 1 submit
-  const onCheckSlots = async (data) => {
-    await dispatch(getDoctorsAvailableSlots({
-      doctorId: data.docId,
-      dayOfWeek: Number(data.dOfW),
-    })).unwrap();
-    setSlotsChecked(true);
-  };
+  // const onCheckSlots = async (data) => {
+  //   await dispatch(getDoctorsAvailableSlots({
+  //     doctorId: data.docId,
+  //     dayOfWeek: Number(data.dOfW),
+  //   })).unwrap();
+  //   setSlotsChecked(true);
+  // };
 
    const onCheckSlotsByDate = async (data) => {
     await dispatch(getDoctorsAvailableSlotsByDate({
@@ -103,17 +105,19 @@ const AppointmentForm = () => {
   const selectedDOfW = watchSlots('dOfW');
 
   return (
-    <Container className='mt-3 mb-3'>
+     <Container fluid className="mt-3 mb-5 px-0">
 {console.log(`checking doctorsShift output in component`,doctorsShift)}
       {/* ── Form 1: Check Availability ── */}
-      <Row>
-        <Col md={8}>
+  <Row className="g-4 align-items-start">
+        <Col xs={12}  xl={5}>
           <h3>Check Doctor Availability</h3>
+      <Row className="g-4 align-items-start">
           <Form 
           //onSubmit={handleSlotsSubmit(onCheckSlots)} 
           onSubmit={handleSlotsSubmit(onCheckSlotsByDate)}
           className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
-
+    <Row className="g-3 align-items-start">
+        <Col xs={12} sm={6}>
             <Form.Group controlId="docId" className='mb-3'>
               <Form.Label>Doctor</Form.Label>
               <Form.Select
@@ -129,20 +133,9 @@ const AppointmentForm = () => {
               </Form.Select>
               <Form.Control.Feedback type="invalid">{slotsErrors.docId?.message}</Form.Control.Feedback>
             </Form.Group>
-
-            {/* <Form.Group controlId="dOfW" className='mb-3'>
-              <Form.Label>Day of Week</Form.Label>
-              <Form.Select
-                {...registerSlots('dOfW', { required: 'Please select a day.' })}
-                isInvalid={!!slotsErrors.dOfW}
-              >
-                <option value="">---Select a day---</option>
-                {daysOfWeek.map((d) => (
-                  <option key={d.value} value={d.value}>{d.label}</option>
-                ))}
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{slotsErrors.dOfW?.message}</Form.Control.Feedback>
-            </Form.Group> */}
+            </Col>
+           
+              <Col xs={12} sm={6}>
               <Form.Group controlId="dOfW" className='mb-3'>
               <Form.Label>Day of Week</Form.Label>
               <Form.Control type='date'
@@ -153,19 +146,22 @@ const AppointmentForm = () => {
               </Form.Control>
               <Form.Control.Feedback type="invalid">{slotsErrors.date?.message}</Form.Control.Feedback>
             </Form.Group>
-
+            </Col>
+            <Col xs={12}>
             <Form.Group className='mb-3'>
-              <Button variant="primary" type="submit">Check Available Slots</Button>
+              <Button variant="primary" type="submit" className='py-2 w-100'> <i className="bi bi-search me-2"></i>Check Available Slots</Button>
             </Form.Group>
-
+            </Col>
+</Row>
           </Form>
+          </Row>
         </Col>
-      </Row>
+      
 
       {/* ── Slots Result ── */}
       {slotsChecked && 
-      <Row>
-        <Col md={8}>
+    
+         <Col xs={12} xl={7}>
           {doctorSlots.length > 0 ? (
             <Alert variant='info'>
               <p className="text-center" style={{ fontSize: "20px" }}><i>Doctor Available Slots</i></p>
@@ -181,17 +177,19 @@ const AppointmentForm = () => {
             <Alert variant='danger'>No slots available for this doctor</Alert>
           )}
         </Col>
-      </Row>
+    
       }
 
       {/* ── Form 2: Book Appointment ── */}
       <h3>Book Appointment</h3>
-      <Row>
-        <Col md={8}>
-          {patientsMessage && <Alert variant='info'>{patientsMessage}</Alert>}
+  
+         <Col xs={12} xl={5}>
+          {/* {patientsMessage && <Alert variant='info'>{patientsMessage}</Alert>} */}
 
           <Form onSubmit={handleApptSubmit(onBookAppointment)} className="d-flex gap-2 flex-wrap align-items-end mb-4 shadow p-3">
-
+    <Row className="g-3 align-items-start">
+ <Col xs={12} sm={6}>
+   
             <Form.Group controlId="doctorId">
               <Form.Label>Doctor</Form.Label>
               <Form.Select
@@ -207,7 +205,8 @@ const AppointmentForm = () => {
               </Form.Select>
               <Form.Control.Feedback type="invalid">{apptErrors.doctorId?.message}</Form.Control.Feedback>
             </Form.Group>
-
+</Col>
+  <Col xs={12} sm={6}>
             <Form.Group controlId="patientId">
               <Form.Label>Patient</Form.Label>
               <Form.Select
@@ -223,7 +222,8 @@ const AppointmentForm = () => {
               </Form.Select>
               <Form.Control.Feedback type="invalid">{apptErrors.patientId?.message}</Form.Control.Feedback>
             </Form.Group>
-
+            
+</Col>
             {/* <Form.Group controlId="dayOfWeek">
               <Form.Label>Day of Week</Form.Label>
               <Form.Select
@@ -237,7 +237,7 @@ const AppointmentForm = () => {
               </Form.Select>
               <Form.Control.Feedback type="invalid">{apptErrors.dayOfWeek?.message}</Form.Control.Feedback>
             </Form.Group> */}
-
+                <Col xs={12} sm={6}>
                 <Form.Group controlId="startTime">
               <Form.Label>Appointment Date </Form.Label>
               <Form.Control
@@ -247,7 +247,8 @@ const AppointmentForm = () => {
               />
               <Form.Control.Feedback type="invalid">{apptErrors.appointmentDate?.message}</Form.Control.Feedback>
             </Form.Group>
-
+              </Col>
+               <Col xs={12} sm={6}>
             <Form.Group controlId="startTime">
               <Form.Label>Start Time</Form.Label>
               <Form.Control
@@ -257,7 +258,8 @@ const AppointmentForm = () => {
               />
               <Form.Control.Feedback type="invalid">{apptErrors.startTime?.message}</Form.Control.Feedback>
             </Form.Group>
-
+            </Col>
+             <Col xs={12} sm={6}>
             <Form.Group controlId="notes">
               <Form.Label>Notes</Form.Label>
               <Form.Control
@@ -268,9 +270,15 @@ const AppointmentForm = () => {
               />
               <Form.Control.Feedback type="invalid">{apptErrors.notes?.message}</Form.Control.Feedback>
             </Form.Group>
-
-            <Button variant="primary" type="submit" className='mt-3'>Submit</Button>
-
+             </Col>
+              
+              </Row>
+              <Col xs={12} sm={12}>
+              <FormGroup>
+            <Button variant="primary" type="submit" className='mt-3  w-100'>Submit</Button>
+               </FormGroup>
+               
+              </Col>
           </Form>
         </Col>
       </Row>

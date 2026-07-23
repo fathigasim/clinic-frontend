@@ -104,27 +104,30 @@ export const addPatient = createAsyncThunk(
       console.log('Added Patient Data:', result);
       return result;
     } catch (error) {
-      console.error('Error response data:', error.response?.data);
-        rejectWithValue(error.response?.data || error.message || "Failed to add patient");
-      //  Handle array of errors
-      const errors = error.response.data;
-  console.log("testing errors before reject with values",errors)
-      if (Array.isArray(errors)) {
-        // If it's an array, join into a string or return as-is
-        return rejectWithValue(errors);
+       const status = error.response?.status;
+      const data = error.response?.data;
+    
+      if (status === 400) {
+        console.log(`Checking console fluent api errors`,data?.errors);
+  return rejectWithValue({ 
+    fieldErrors: data?.errors ?? null, 
+    message: data?.message ?? "Validation failed." 
+  });
+
+  
+}
+
+      if (status === 404) {
+        return rejectWithValue({ message: "Resource not found." });
+      }
+if (status === 422) {
+       return rejectWithValue({ message: data?.detail ?? "Unable to process request." });
+   }
+      if (status === 500) {
+        return rejectWithValue({ message: "Server error, please try again later." });
       }
 
-      // If it's an object with errors property
-      if (errors?.errors) {
-        return rejectWithValue(errors.errors);
-      }
-
-      // If it's an object with message
-      if (errors?.message) {
-        return rejectWithValue(errors.message);
-      }
-
-      return rejectWithValue("Failed to add product");
+      return rejectWithValue({ message: "Failed to update patient." });
      
     }
   }

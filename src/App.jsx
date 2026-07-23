@@ -40,6 +40,7 @@ import MfaVerify from './features/auth/components/MfaVerify'
 import { selectIsAuthenticated, initializeAuth } from './features/auth/authSlice';
 import { tokenService } from './services/tokenService';
 import EditPatient from './features/patient/components/EditPatient';
+import EditDoctor from './features/doctor/components/EditDoctor';
 
 function App() {
   const dispatch = useDispatch();
@@ -101,7 +102,8 @@ function App() {
            <Route path="/patients/editpatients/:id" element={<EditPatient />} />
           <Route path="/doctors/doctor-form" element={<DoctorForm />} />
           <Route path='/Doctors/schedule' element={<DoctorSchedule />} />  
-          <Route path='/Doctors/weekly-schedule' element={<DoctorsSchedule />} />
+          <Route path='/Doctors/doctor-schedule' element={<DoctorsSchedule />} />
+          <Route path='/Doctors/editdoctors/:id' element={<EditDoctor />} />
           <Route path='/Appointments/appointmentform' element={<AppointmentForm />} />
           <Route path='/Appointments/appointments' element={<TodayAppointments />} />
           <Route path='/doctors/medical-records' element={<MedicalRecordForm />} />
