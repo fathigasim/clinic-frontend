@@ -1,7 +1,11 @@
  import api from '../../services/api';
  
  export const doctorApi = {
-  
+   getDoctorScheduleByIdApi: async (id) => {
+    const response = await api.get(`/doctors/doctorScheduleById/${id}`);
+    console.log(`api Doctors Schedule data : ${response.data}`)
+    return response.data;
+  },
    getDoctorsScheduleApi: async () => {
     const response = await api.get('/doctors/doctorsSchedule');
     console.log(`api Doctors Schedule data : ${response.data}`)
@@ -32,6 +36,12 @@
   },
     addDoctorApi: async (payload) => {
     const response = await api.post('/doctors', payload);
+    console.log(`api Doctors data : ${response.data}`)
+    return response.data;
+  },
+
+     editDoctorScheduleApi: async (id,payload) => {
+    const response = await api.put(`/doctors/${id}`, payload);
     console.log(`api Doctors data : ${response.data}`)
     return response.data;
   },

@@ -2,6 +2,19 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { doctorApi } from './doctorApi';
 
 
+export const getDoctorScheduleById = createAsyncThunk(
+  'doctor/getDoctorScheduleById',
+  async (id) => {
+    try {
+      const result = await doctorApi.getDoctorScheduleByIdApi(id);
+      console.log(' Doctor Schedule By id Data:', result);
+      return result;
+    } catch (error) {
+      console.error('Error response data:', error.response?.data);
+      throw error;
+    }
+  }
+);
 
 export const getScheduledDoctors = createAsyncThunk(
   'doctor/getListedScheduledDoctors',
@@ -114,7 +127,41 @@ if (status === 422) {
     }
   }
 );
+//edit doctor
+export const EditDoctorSchedule = createAsyncThunk(
+  'doctor/editDoctor',
+  async ({id,payload}, { rejectWithValue }) => {
+    try {
+      const result = await doctorApi.editDoctorScheduleApi(id,payload);
+      console.log('Added Doctor Data:', result);
+      return result;
+    } catch (error) {
+       const status = error.response?.status;
+      const data = error.response?.data;
+      
+      if (status === 400) {
+  return rejectWithValue({ 
+    fieldErrors: data?.errors ?? null, 
+    message: data?.message ?? "Validation failed." 
+  });
+}
 
+      if (status === 404) {
+        return rejectWithValue({ message: "Resource not found." });
+      }
+if (status === 422) {
+       return rejectWithValue({ message: data?.detail ?? "Unable to process request." });
+   }
+      if (status === 500) {
+        return rejectWithValue({ message: "Server error, please try again later." });
+      }
+
+      return rejectWithValue({ message: "Failed to add doctor schedule." });
+     
+    }
+  }
+);
+//Add schedule to doctor
 export const addDoctorSchedule = createAsyncThunk(
   'doctor/doctorSchedule',
   async (schedule, { rejectWithValue }) => {
@@ -251,6 +298,7 @@ const doctorSlice = createSlice({
         state.loading = false;
         state.error = null;
       }) 
+      //add doctor schedule
       .addCase(addDoctorSchedule.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -259,6 +307,29 @@ const doctorSlice = createSlice({
         state.loading = false;
         state.error = null;
       }).addCase(addDoctorSchedule.rejected, (state) => {
+        state.loading = false;
+        state.error = null;
+      }) 
+      //edit doctor schedule
+       .addCase(EditDoctorSchedule.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(EditDoctorSchedule.fulfilled, (state,action) => {
+       state.data=action.payload
+        state.loading = false;
+        state.error = null;
+      }).addCase(EditDoctorSchedule.rejected, (state) => {
+        state.loading = false;
+        state.error = null;
+      }) 
+       .addCase(getDoctorScheduleById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(getDoctorScheduleById.fulfilled, (state,action) => {
+       state.data=action.payload
+        state.loading = false;
+        state.error = null;
+      }).addCase(getDoctorScheduleById.rejected, (state) => {
         state.loading = false;
         state.error = null;
       }) 
