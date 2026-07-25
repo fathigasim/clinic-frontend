@@ -41,7 +41,7 @@
   },
 
      editDoctorScheduleApi: async (id,payload) => {
-    const response = await api.put(`/doctors/${id}`, payload);
+    const response = await api.put(`/doctors/updatedoctorsSchedule/${id}`,payload);
     console.log(`api Doctors data : ${response.data}`)
     return response.data;
   },

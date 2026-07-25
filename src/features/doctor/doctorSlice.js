@@ -130,9 +130,9 @@ if (status === 422) {
 //edit doctor
 export const EditDoctorSchedule = createAsyncThunk(
   'doctor/editDoctor',
-  async ({id,payload}, { rejectWithValue }) => {
+  async ({id,doctorSchedule}, { rejectWithValue }) => {
     try {
-      const result = await doctorApi.editDoctorScheduleApi(id,payload);
+      const result = await doctorApi.editDoctorScheduleApi(id,doctorSchedule);
       console.log('Added Doctor Data:', result);
       return result;
     } catch (error) {

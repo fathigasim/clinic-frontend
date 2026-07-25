@@ -1,14 +1,16 @@
 import {useEffect} from 'react'
 import { useParams } from 'react-router'
 import { useDispatch,useSelector} from 'react-redux';
-import { getDoctorScheduleById} from '../doctorSlice';
+import { getDoctorScheduleById,EditDoctorSchedule} from '../doctorSlice';
 import { Spinner,Container,Col,Row,Form, FormControl, FormGroup, Button } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import Feedback from 'react-bootstrap/esm/Feedback';
+import { useNavigate } from 'react-router';
 
 export const EditDoctor = () => {
     const {id}=useParams();
     const dispatch=useDispatch();
+    const navigate=useNavigate();
     const {loading,error,data:doctor}=useSelector((state)=>state.doctor);
 
       const {
@@ -18,7 +20,9 @@ export const EditDoctor = () => {
           formState: { errors },
           watch,
           reset
-        } = useForm();
+        } = useForm(
+        //  {values: doctor}
+        );
     useEffect(()=>{
         console.log('Checking Id got to edit doctor component',id);
       if(id==null)
@@ -31,20 +35,53 @@ export const EditDoctor = () => {
       useEffect(()=>{
         if(doctor&&doctor.doctorId===id)
         {
+          console.log(`doctor shape before the reset`,doctor)
           reset({
             doctorId:doctor.doctorId,
 doctorName:doctor.doctorName,
-scheduledDate:doctor.scheduledDate,
-dayOfWeek:	doctor.dayOfWeek,
+scheduleDate:doctor.scheduleDate,//.split("T")[0],
+
 startTime:doctor.startTime,
-endTime:doctor.startTime,
-slotDurationMinutes:doctor.slotDurationMinutes,
-isActive:doctor.isActive
+endTime:doctor.endTime
+
           })
         }
       },[doctor,id,reset])
      if(error){
       return (<div className='alert alert-danger'>{error}</div>)
+     }
+
+     const handleUpdateDoctorSchedule =async (data,e)=>{
+      e.preventDefault();
+            const payload={
+              id:id,
+              scheduleDate:data.scheduleDate,
+              startTime:data.startTime,
+              endTime:data.endTime
+            }
+
+             console.log(`checking payload before submit `,payload.id)
+            try{
+    const result=  await  dispatch(EditDoctorSchedule({id:id,doctorSchedule:payload})).unwrap();
+      // await dispatch(UpdatePatient({ id: data.patientId, patient: payload })).unwrap();
+      console.log(`Checking update result output`,result)
+       navigate('/Doctors/doctor-schedule',{state:{message:` ${result}`}})
+         reset({
+            doctorId:'',
+
+scheduleDate:'',
+
+startTime:'',
+endTime:'',
+
+          })
+       
+        }
+        catch(error){
+          if(error.fieldErrors?.ScheduleDate)  setError('scheduleDate',{message:error.fieldErrors?.ScheduleDate})
+             if(error.fieldErrors?.StartTime)  setError('startTime',{message:error.fieldErrors?.StartTime})
+               if(error.fieldErrors?.EndTime)  setError('endTime',{message:error.fieldErrors?.EndTime})
+        }
      }
   return (
     <div>
@@ -53,14 +90,32 @@ isActive:doctor.isActive
           <Container>
             <Row className='justify-content-center'>
                 <Col xs={6} sm={12} xl={6}>
-                   <Form  onSubmit={handleSubmit}>
+                 {Object.keys(errors).filter(k => k !== 'root').length > 0 && (
+    <div className="alert alert-danger">
+      <h5>Please fix the following errors:</h5>
+      <ul className="mb-0">
+        {Object.keys(errors)
+          .filter(k => k !== 'root')
+          .map((key) => (
+            <li key={key}>{errors[key]?.message}</li>
+          ))}
+      </ul>
+    </div>
+  )}
+                   <Form  onSubmit={handleSubmit(handleUpdateDoctorSchedule)}>
                       <Row className='align-items-center'>
                         <Col xs={12} sm={6}>
+                         <FormControl 
+                          hidden
+                          {...register('doctorId')}
+                          
+                        isInvalid={!!errors.doctorId}
+                     />
                         <FormGroup>
                           <Form.Label>Doctor Name</Form.Label>
                         <FormControl 
                           readOnly
-                          {...register('doctorName',{required:" please inter firstname"})}
+                          {...register('doctorName',{required:" please enter doctorName"})}
                         isInvalid={!!errors.doctorName}
                      />
                        <Feedback type='invalid'>
@@ -73,12 +128,12 @@ isActive:doctor.isActive
                           <FormGroup>
                           <Form.Label>Schedule Date</Form.Label>
                         <FormControl 
-                        
-                          {...register('scheduledDate',{valueAsDate:true,required:" please inter firstname"})}
-                        isInvalid={!!errors.scheduledDate}
+                           type="date" 
+                          {...register('scheduleDate',{required:" please Enter Schedule Date"})}
+                        isInvalid={!!errors.scheduleDate}
                      />
                        <Feedback type='invalid'>
-                         {errors.scheduledDate?.message}
+                         {errors.scheduleDate?.message}
                        </Feedback>
                      </FormGroup>
                         </Col>
@@ -87,7 +142,7 @@ isActive:doctor.isActive
                           <Form.Label>Start Time</Form.Label>
                         <FormControl 
                         type='time'
-                          {...register('startTime',{valueAsDate:true,required:" please inter firstname"})}
+                          {...register('startTime',{required:" please enter start time"})}
                         isInvalid={!!errors.startTime}
                      />
                        <Feedback type='invalid'>
@@ -100,7 +155,7 @@ isActive:doctor.isActive
                           <Form.Label>End Time</Form.Label>
                         <FormControl 
                           type='time'
-                          {...register('endTime',{required:" please inter endTime"})}
+                          {...register('endTime',{required:" please Enter End Time"})}
                         isInvalid={!!errors.endTime}
                      />
                        <Feedback type='invalid'>

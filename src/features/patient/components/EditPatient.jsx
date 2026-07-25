@@ -52,7 +52,7 @@ import Feedback from 'react-bootstrap/esm/Feedback';
       firstName:data.firstName,
       lastName:data.lastName,
       email:data.email,
-      dob:data.dob,//.split("T")[0],
+      dob:data.dob.split("T")[0],
       phone:data.phone,
       gender:data.gender,//||""
     }
