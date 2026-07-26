@@ -103,7 +103,7 @@ const AppointmentForm = () => {
   // ];
 
   const selectedDOfW = watchSlots('dOfW');
-
+console.log(`Checking todays patients`,todayPatients)
   return (
      <Container fluid className="mt-3 mb-5 px-0">
 {console.log(`checking doctorsShift output in component`,doctorsShift)}

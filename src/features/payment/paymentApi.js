@@ -14,5 +14,10 @@ PaymentIntentApi: async(invoiceData)=>
 {
    const response=  await  api.post('/payments/create-payment-intent',invoiceData);
    return response.data;
+},
+PaymentDailySalesApi: async()=>
+{
+   const response=  await  api.get('/PaymentStats');
+   return response.data;
 }
 }

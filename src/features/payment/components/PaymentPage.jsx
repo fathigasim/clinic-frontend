@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { confirmPayment, selectClientSecret } from '../paymentSlice';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
-import { Spinner } from 'react-bootstrap';
-
+import { Spinner,Container,Col,Row, Button, FormGroup } from 'react-bootstrap';
+import { MdPayments } from "react-icons/md";
 const stripePromise = loadStripe(import.meta.env.VITE_Publishable_Key); //  public key only on frontend
 
  const CheckoutForm = () => {
@@ -44,10 +44,21 @@ const stripePromise = loadStripe(import.meta.env.VITE_Publishable_Key); //  publ
   };
 
   return (
+    <>
+    <Container>
+      <Row>
+        <Col xs={12} sm={7}>
     <form onSubmit={handleSubmit}>
+      
       <PaymentElement /> {/* Stripe's hosted UI — no raw card data touches your code */}
-      <button type="submit">Pay</button>
+       <FormGroup className='mt-3'>
+      <Button variant='info' type="submit" className='w-100' ><i><MdPayments/></i>Pay</Button>
+      </FormGroup>
     </form>
+    </Col>
+    </Row>
+    </Container>
+    </>
   );
 };
 

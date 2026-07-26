@@ -50,5 +50,10 @@
     console.log(`api Doctors Schedule data : ${response.data}`)
     return response.data;
   },
+  deleteDoctorScheduleByIdApi: async (id) => {
+    const response = await api.delete(`/doctors/doctorsSchedule/${id}`);
+    console.log(`api delete Doctors Schedule data : ${response.data}`)
+    return response.data;
+  },
 }
   

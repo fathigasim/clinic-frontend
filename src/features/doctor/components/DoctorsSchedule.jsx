@@ -1,11 +1,16 @@
  
 import {useEffect} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getDoctorsSchedule, selectDoctorSchedule } from '../doctorSlice';
-import {Container} from 'react-bootstrap';
+import { getDoctorsSchedule, selectDoctorSchedule ,deleteDoctorSchedule} from '../doctorSlice';
+import {Button, Container} from 'react-bootstrap';
 import { Link } from 'react-router';
 import { useLocation } from 'react-router';
 import { toast } from 'react-toastify';
+import DeleteDoctorScheduleModal from './DeleteDoctorScheduleModal';
+import { FaRegTrashAlt } from "react-icons/fa";
+import { FaBeer } from "react-icons/fa";
+import { AiTwotoneDelete } from "react-icons/ai";
+
  const DoctorsSchedule = () => {
 const dispatch = useDispatch();
 const doctorSchedule = useSelector(selectDoctorSchedule);
@@ -32,6 +37,17 @@ useEffect(() => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+  const handleDeleteDoctorSchedule=async (id)=>{
+    try{
+      const result= await  dispatch(deleteDoctorSchedule(id)).unwrap();
+            console.log(`printing out delete doctor schedule result`,result)     
+        toast.info(result);
+ await dispatch(getDoctorsSchedule());
+    }
+      catch(error){
+           console.log(error)
+      }
+  }
   return ( <>
     {console.log("doctorSchedule data in component =>",doctorSchedule?.schedule?.Sunday?.[0]?.doctorName)}
     <Container style={{marginTop:"2rem"}}>
@@ -64,31 +80,20 @@ useEffect(() => {
       <td>{doctor.startTime}</td>
       <td>{doctor.endTime}</td>
       <td><Link to={`/Doctors/editdoctors/${doctor.doctorId}`}>Edit</Link></td>
+       <td>
+        {/* <Button type='submit' onClick={()=>{
+      var confirmed=   window.confirm('Are you sure you want to delete?');
+           if(confirmed)
+          handleDeleteDoctorSchedule(doctor.doctorId)
+         
+        }
+       } variant='danger'> Delete</Button> */}
+       <DeleteDoctorScheduleModal id={doctor.doctorId}/>
+       
+       </td>
     </tr>
   ))
 )}
-            </tbody>
-          </table>
-     </div>
-        <div style={{display:"flex",flexDirection:"column",gap:"1rem",marginTop:"1rem",boxShadow:"0 4px 8px rgba(0, 0, 0, 0.1)",padding:"1rem",borderRadius:"8px"}}>
-         <label style={{fontSize:"1.2rem",fontWeight:"bold"}}>Monday</label>
-          <br/>
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Doctor Name</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {doctorSchedule?.schedule.Monday?.map((doctor) => (
-                <tr key={doctor.id}>
-                  <td>{doctor.doctorName}</td>
-                  <td>{doctor.startTime}</td>
-                  <td>{doctor.endTime}</td>
-                </tr>
-              ))}
             </tbody>
           </table>
      

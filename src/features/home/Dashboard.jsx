@@ -11,8 +11,20 @@ import {
   Navbar,
   Card,
 } from "react-bootstrap";
+import { useEffect } from "react";
+import {dailySalesTotal} from '../payment/paymentSlice'
+import {useDispatch, useSelector } from "react-redux";
 
 const Dashboard = () => {
+
+     const {data:salesTotal,loading}=useSelector((state)=>state.payment);
+
+     const dispatch=useDispatch();
+   useEffect(()=>{
+      dispatch(dailySalesTotal())
+   },[dispatch])
+
+   console.log(`Checking salesTotal result`,salesTotal)
   return (
     // <Container fluid>
     //   <Row>
@@ -180,9 +192,9 @@ const Dashboard = () => {
               <article class="metric-card metric-primary">
                 <div class="metric-top">
                   <span class="metric-label">Revenue</span>
-                  <span class="metric-icon"><i class="bi bi-currency-dollar" aria-hidden="true"></i></span>
+                  <span class="metric-icon"><i class="bi bi-currency-dollar" aria-hidden="true">{salesTotal}</i></span>
                 </div>
-                <div class="metric-value">$48,240</div>
+                <div class="metric-value">{loading?(<span>...loading</span>):(<div><span>SAR</span> <span>{salesTotal}</span></div>) }</div>
                 <div class="metric-meta">
                   <span class="text-success">+12.5%</span>
                   <span>from last month</span>

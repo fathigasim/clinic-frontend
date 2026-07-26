@@ -202,6 +202,22 @@ if (status === 422) {
     }
   }
 );
+
+
+
+export const deleteDoctorSchedule = createAsyncThunk(
+  'doctor/deleteDoctorScheduleById',
+  async (id) => {
+    try {
+      const result = await doctorApi.deleteDoctorScheduleByIdApi(id);
+      console.log('Delete doctor Schedule By id Data:', result);
+      return result;
+    } catch (error) {
+      console.error('Error response data:', error.response?.data);
+      throw error;
+    }
+  }
+);
 // Initial state
 const initialState = {
   scheduledDoctors:[],
@@ -330,6 +346,18 @@ const doctorSlice = createSlice({
         state.loading = false;
         state.error = null;
       }).addCase(getDoctorScheduleById.rejected, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      //delete doctor schedule
+      .addCase(deleteDoctorSchedule.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      }).addCase(deleteDoctorSchedule.fulfilled, (state,action) => {
+       state.data=action.payload
+        state.loading = false;
+        state.error = null;
+      }).addCase(deleteDoctorSchedule.rejected, (state) => {
         state.loading = false;
         state.error = null;
       }) 
