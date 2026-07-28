@@ -19,5 +19,12 @@ PaymentDailySalesApi: async()=>
 {
    const response=  await  api.get('/PaymentStats');
    return response.data;
+},
+GetPaymentsByDateApi: async({date,page,pageSize})=>
+{
+   const response=  await  api.get(`/PaymentStats/GetPaymentsByDate`,{
+    params: { date,page,pageSize }
+});
+   return response.data;
 }
 }

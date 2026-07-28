@@ -4,9 +4,33 @@ const initialState={
     message:null,
     error:null,
     data:0,
+    paymentslist:[],
+    totalPages:0,
     loading:false,
      clientSecret: null
 }
+
+//Payment total by date
+export const getPaymentsByDate = createAsyncThunk(
+    'payment/reports/getPaymentsByDate',
+    async (params, { rejectWithValue }) => {
+        try {
+            const response = await paymentApi.GetPaymentsByDateApi({date:params.date,page:params.page,pageSize:params.pageSize });
+          console.log('thunk getPaymentsByDate result',response)
+            if(!response.isSuccess){
+               console.log('dispatching rejectWithValue with:', response.errorMessage);
+              return rejectWithValue(response.errorMessage)
+            }
+            console.log(`thunk getPaymentsByDate response data sucess`,response.data);
+            return response.data;
+        } catch (error) {
+         
+      return rejectWithValue(error||"Failed to fetch payments list");
+     
+        }
+    }
+);
+
 //daily payment sales thunk
 export const dailySalesTotal = createAsyncThunk(
     'payment/dailySalesTotal',
@@ -117,7 +141,8 @@ const paymentSlice=createSlice({
     },
    clearMessge:(state)=>{
     state.message=null;
-   }
+   },
+ 
   },
   extraReducers:(builder)=>{
     builder.addCase(addPayment.pending,(state)=>{
@@ -153,6 +178,26 @@ const paymentSlice=createSlice({
     }).addCase(dailySalesTotal.rejected,(state,action)=>{
         state.loading=false;
         state.error=action.payload
+    })
+    //Payments by date
+    builder.addCase(getPaymentsByDate.pending,(state)=>{
+        state.loading=true;
+        state.error=null;
+        state.totalPages=0;
+        state.paymentslist=[];
+    }).addCase(getPaymentsByDate.fulfilled,(state,action)=>{
+      console.log(`success extra reduct result`,action.payload)
+        state.loading=false;
+        state.paymentslist=action.payload.items||[];
+        state.totalPages=action.payload.totalPages;
+        state.error=null
+        console.log(`success extra reducer  state.payments result`, state.payments)
+    }).addCase(getPaymentsByDate.rejected,(state,action)=>{
+          console.log(`rejected extra reducer  getPaymentsByDate.rejected`, action.payload)  
+      state.loading=false;
+        state.error=action.payload;
+       state.paymentslist=[];
+        state.totalPages=0;
     })
   }
 })

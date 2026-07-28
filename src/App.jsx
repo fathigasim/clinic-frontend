@@ -41,6 +41,7 @@ import { selectIsAuthenticated, initializeAuth } from './features/auth/authSlice
 import { tokenService } from './services/tokenService';
 import EditPatient from './features/patient/components/EditPatient';
 import EditDoctor from './features/doctor/components/EditDoctor';
+import PaymentsByDate from './features/payment/components/PaymentReports/PaymentsByDate'
 
 function App() {
   const dispatch = useDispatch();
@@ -110,6 +111,8 @@ function App() {
           <Route path='/invoice/invoice-form' element={<InvoiceForm />} />
           <Route path='/payments/payment-form' element={<PaymentForm />} />
           <Route path='/payments/payment-success' element={<PaymentSuccess />} />
+          //Payments Reports
+          <Route path='/payments/reports/paymentsByDate' element={<PaymentsByDate />} />
           <Route path='/invoice/MonthlyStats' element={<MonthlyInvoiceCharts />} />
           <Route path='/invoice/WeeklyStats' element={<WeeklyInvoiceCharts />} />
           <Route path='/invoice/DailyStats' element={<DailyInvoiceCharts />} />
