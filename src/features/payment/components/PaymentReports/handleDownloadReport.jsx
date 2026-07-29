@@ -1,6 +1,11 @@
-export const handleDownloadReport = () => {
-  const url = `https://localhost:7032/api/PaymentStats/GetPaymentsByDateReport?date=${date}`;
+export const DownloadReport = ({date}) => {
+
+    return(
+        <button onClick={()=>{
+  const url = `https://localhost:7032/api/PaymentStats/GetPaymentsByDateReportPdf?date=${date}`;
   window.open(url, '_blank');
+        }}>Download</button>
+    )
 };
 
 //optoin a

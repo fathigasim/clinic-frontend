@@ -10,7 +10,31 @@ const initialState={
      clientSecret: null
 }
 
-//Payment total by date
+//Payments by date with both formats pdf&excel
+const contentTypeMap = { pdf: 'application/pdf', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+
+export const getPaymentsByDateReport = createAsyncThunk(
+  'payment/reports/getPaymentsByDateReport',
+  async ({ date, format }, { rejectWithValue }) => {
+    try {
+      const response = await paymentApi.getPaymentsReportApi(date, format);
+      const blob = new Blob([response.data], { type: contentTypeMap[format] });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `payment-report-${date}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      return true;
+    } catch (error) {
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to fetch report';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+//Payments by date
 export const getPaymentsByDate = createAsyncThunk(
     'payment/reports/getPaymentsByDate',
     async (params, { rejectWithValue }) => {
@@ -29,6 +53,42 @@ export const getPaymentsByDate = createAsyncThunk(
      
         }
     }
+);
+//PaymentsPdfReport
+export const getPaymentsByDatePdf = createAsyncThunk(
+  'payment/reports/getPaymentsByDatePdf',
+  async (date, { rejectWithValue }) => {
+    try {
+      const response = await paymentApi.getPaymentsReportPdfApi(date);
+
+      if (!response || !response.data) {
+        throw new Error('No data received from API');
+      }
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `payment-report-${date}.pdf`;
+      // link.click();
+      // window.URL.revokeObjectURL(url);
+
+      document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+window.URL.revokeObjectURL(url);
+
+      return true; // Return a serializable success value
+    } catch (error) {
+      // Extract a serializable string instead of passing the raw Error object
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to fetch payments list';
+
+      return rejectWithValue(errorMessage);
+    }
+  }
 );
 
 //daily payment sales thunk
@@ -198,6 +258,23 @@ const paymentSlice=createSlice({
         state.error=action.payload;
        state.paymentslist=[];
         state.totalPages=0;
+    })
+    //
+    builder.addCase(getPaymentsByDatePdf.pending,(state)=>{
+        state.loading=true;
+        state.error=null;
+      
+    }).addCase(getPaymentsByDatePdf.fulfilled,(state)=>{
+   
+        state.loading=false;
+      
+        state.error=null
+        console.log(`success extra reducer  state.payments result`, state.payments)
+    }).addCase(getPaymentsByDatePdf.rejected,(state)=>{
+         
+      state.loading=false;
+        state.error=null;
+      
     })
   }
 })

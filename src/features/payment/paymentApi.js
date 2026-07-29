@@ -26,5 +26,22 @@ GetPaymentsByDateApi: async({date,page,pageSize})=>
     params: { date,page,pageSize }
 });
    return response.data;
+},
+ getPaymentsReportPdfApi : async (date) => {
+  const response = await api.get(`/PaymentStats/GetPaymentsByDateReportPdf`, {
+    params: { date },
+    responseType: 'blob', // critical - tells axios to expect binary
+  });
+   console.log('status:', response.status);
+  console.log('content-type:', response.headers['content-type']);
+  console.log('data is Blob:', response.data instanceof Blob, 'size:', response.data?.size);
+  return response;
+},
+getPaymentsReportApi: async (date, format = 'pdf') => {
+  const response = await api.get(`/PaymentStats/GetPaymentsByDateReport`, {
+    params: { date, format },
+    responseType: 'blob',
+  });
+  return response;
 }
 }

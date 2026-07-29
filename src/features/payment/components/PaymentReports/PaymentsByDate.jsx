@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Container,Row,Col,Form,FormControl
-  ,Button, Alert, FormGroup, Spinner } from 'react-bootstrap'
+  ,Button, Alert, FormGroup, Spinner ,Table} from 'react-bootstrap'
 import { useDispatch,useSelector } from 'react-redux'
-import {getPaymentsByDate} from '../../paymentSlice'
+import {getPaymentsByDate,getPaymentsByDatePdf,getPaymentsByDateReport} from '../../paymentSlice'
+import { DownloadReport } from './handleDownloadReport'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
 import Paginationbootstrap from '../../../../components/Pagintationbootstrap'
@@ -17,7 +18,7 @@ const PaymentsByDate = () => {
   const pageSize = Number(searchParams.get('pageSize')) || 2;
 
   // 2. Select Redux state
-  const { paymentslist, error, totalPages } = useSelector((state) => state.payment);
+  const { paymentslist, error, loading,totalPages } = useSelector((state) => state.payment);
 
   // 3. Setup React Hook Form with URL's initial date
   const { register, handleSubmit, formState: { errors } } = useForm({
@@ -73,17 +74,74 @@ const PaymentsByDate = () => {
         </Form>
              
                  <>
-                 {/* {loading&&<Spinner variant='' size='sm' className='align-item-center'></Spinner>} */}
-                      <ul>
-                 {
-                   paymentslist.length>0&&
-                    paymentslist.map((payment)=>
-                      <li key={payment.paymentId}>
-                        {payment.customerId}
-                      </li>
-                    )
-                 }
-             </ul>
+                 <Container className='mt-5 mb-5'>
+                  {loading ?(<Spinner variant='' size='sm' className='align-item-center'></Spinner>)
+                    :(
+                       <div> {paymentslist.length >0&&
+                       <> 
+                          {/* <Button  onClick={handleDownloadReport()} size='sm' variant='info'>Download Pdf Report</Button> */}
+                            {/* <DownloadReport date={date}/> */}
+                           <Row >
+                              <Col sm={3} xm={4}>
+                                   <Button onClick={()=>{
+                              console.log(`Checking if date reach pdf function`,date)
+                              const formattedDate = new Date(date).toISOString().split('T')[0];
+                                dispatch(getPaymentsByDatePdf(formattedDate))
+                            }} variant='info'>Download report</Button>
+                              </Col>
+                               <Col sm={3} xm={4}>
+                                   <Button onClick={()=>{
+                              console.log(`Checking if date reach pdf function`,date)
+                              const formattedDate = new Date(date).toISOString().split('T')[0];
+                           dispatch(getPaymentsByDateReport({date,format:'pdf'}))
+                            }} variant='info'>Download report Pdf</Button>
+                              </Col>
+                               <Col sm={3} xm={4}>
+                                   <Button onClick={()=>{
+                              console.log(`Checking if date reach pdf function`,date)
+                              const formattedDate = new Date(date).toISOString().split('T')[0];
+                              dispatch(getPaymentsByDateReport({date,format:'xlsx'}))
+                            }} variant='info'>Download report Xls</Button>
+                              </Col>
+                                <Col sm={3} xm={4}>
+                                   <Button onClick={()=>{
+                              console.log(`Checking if date reach pdf function`,date)
+                              const formattedDate = new Date(date).toISOString().split('T')[0];
+                              dispatch(getPaymentsByDateReport({date,format:'csv'}))
+                            }} variant='info'>Download report Csv</Button>
+                              </Col>
+                           </Row>
+                           <br></br>
+                        <Table size='md' striped bordered hover variant="dark" className='mt-5 mb-5' style={{borderRadius:"2 rem"}}>
+                          <tr>
+                            <th>Customer</th>
+                            <th>Invoice No</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                          </tr>
+                         { paymentslist.map((payment)=>(
+                            <tr>
+                              <td>
+                                 {payment.customerId}
+                              </td>
+                              <td>
+                                 {payment.invoiceNo}
+                              </td>
+                              <td>
+                                 {payment.amount}
+                              </td>
+                              <td>
+                                 {payment.status}
+                              </td>
+                              </tr>
+                          )
+                          )}
+                          </Table>
+                          </>
+                       }</div>
+                    )  
+                }
+                     
               
 
 
@@ -93,7 +151,7 @@ const PaymentsByDate = () => {
             searchParams={searchParams}
             setSearchParams={setSearchParams}
           />
-        
+        </Container>
           </>
 
 </Col>
